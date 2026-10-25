@@ -1,152 +1,206 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../lessons/models/lesson.dart';
+import '../../lessons/providers/lesson_provider.dart';
+import '../../lessons/screens/lesson_detail_screen.dart';
+import '../../lessons/services/lesson_recommendation_service.dart';
 import '../models/mood_type.dart';
 import '../state/mood_provider.dart';
-
-/// Placeholder lesson data keyed by mood.
-/// Replace this map with a LessonRepository reading assets/data/lessons.json later.
-class _Lesson {
-  const _Lesson(
-      {required this.title, required this.duration, required this.description});
-  final String title;
-  final String duration;
-  final String description;
-}
-
-const Map<MoodType, _Lesson> _kLessons = {
-  MoodType.veryHappy: _Lesson(
-    title: 'Celebrate Your Wins – Big and Small',
-    duration: '5 min',
-    description: 'Positive wellness habits to maintain your energy.',
-  ),
-  MoodType.happy: _Lesson(
-    title: 'Healthy Postpartum Habits',
-    duration: '6 min',
-    description: 'Simple routines to keep your wellbeing on track.',
-  ),
-  MoodType.neutral: _Lesson(
-    title: 'General Postpartum Wellness',
-    duration: '7 min',
-    description: 'A gentle check-in for the in-between days.',
-  ),
-  MoodType.sad: _Lesson(
-    title: 'Gentle Self-Care on Hard Days',
-    duration: '5 min',
-    description: 'Small acts of kindness you can do for yourself today.',
-  ),
-  MoodType.verySad: _Lesson(
-    title: 'You Are Not Alone',
-    duration: '5 min',
-    description: 'Finding comfort and support during difficult moments.',
-  ),
-};
 
 class SuggestedLessonCard extends StatelessWidget {
   const SuggestedLessonCard({super.key});
 
+  IconData _categoryIcon(String category) {
+    switch (category) {
+      case 'self-care':
+        return Icons.spa_rounded;
+      case 'recovery':
+        return Icons.healing_rounded;
+      case 'mental-health':
+        return Icons.favorite_border_rounded;
+      case 'physical-health':
+        return Icons.directions_walk_rounded;
+      case 'mother-and-baby':
+        return Icons.child_care_rounded;
+      default:
+        return Icons.menu_book_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mood = context.watch<MoodProvider>();
+    final lessonProvider = Provider.of<LessonProvider?>(context);
     final theme = Theme.of(context);
+    final lang = lessonProvider?.currentLanguage ?? 'en';
+    final isTl = lang == 'tl';
 
-    // Pick lesson by most recent mood this month, or default to neutral
-    MoodType lessonMood = MoodType.neutral;
-    if (mood.selectedEntry != null) {
-      lessonMood = mood.selectedEntry!.mood;
-    } else if (mood.monthEntries.isNotEmpty) {
-      lessonMood = mood.monthEntries.last.mood;
+    // Pick active mood: selectedEntry takes priority, then most recent in month
+    final currentMood = mood.selectedEntry?.mood ??
+        (mood.monthEntries.isNotEmpty ? mood.monthEntries.last.mood : null);
+
+    Lesson? recommendedLesson;
+    if (lessonProvider != null && lessonProvider.allLessons.isNotEmpty) {
+      recommendedLesson = LessonRecommendationService().getRecommendation(
+        allLessons: lessonProvider.allLessons,
+        moodId: currentMood?.name,
+        completedIds: lessonProvider.completedIds,
+      );
     }
 
-    final lesson = _kLessons[lessonMood]!;
+    final lessonColor = currentMood?.color ?? theme.colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Suggested for you',
-            style: theme.textTheme.titleSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Text(
+                isTl ? 'Mungkahing Aralin' : 'Suggested for you',
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              if (currentMood != null && recommendedLesson != null)
+                Text(
+                  isTl
+                      ? 'Batay sa iyong check-in'
+                      : 'Based on your check-in',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 10),
-          Card(
-            elevation: 0,
-            color: theme.colorScheme.secondaryContainer
-                .withValues(alpha: 0.4),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Padding(
+          if (recommendedLesson == null)
+            Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  // Thumbnail placeholder
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      color: lessonMood.color.withValues(alpha: 0.25),
-                      child: Icon(Icons.play_circle_outline_rounded,
-                          color: lessonMood.color, size: 36),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                isTl
+                    ? 'Magkakaroon kami ng rekomendasyon para sa iyo sa lalong madaling panahon.'
+                    : "We'll have a recommendation for you soon.",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            Card(
+              elevation: 0,
+              color:
+                  theme.colorScheme.secondaryContainer.withValues(alpha: 0.35),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color:
+                      theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                ),
+              ),
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          LessonDetailScreen(lesson: recommendedLesson!),
                     ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          lesson.title,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          lesson.description,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                  );
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      // Icon / Thumbnail
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          color: lessonColor.withValues(alpha: 0.2),
+                          child: Icon(
+                            _categoryIcon(recommendedLesson.category),
+                            color: lessonColor,
+                            size: 32,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
-                        Row(
+                      ),
+                      const SizedBox(width: 14),
+                      // Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.access_time_rounded,
-                                size: 14,
-                                color: theme.colorScheme.onSurfaceVariant),
-                            const SizedBox(width: 4),
-                            Text(lesson.duration,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                )),
-                            const Spacer(),
-                            TextButton(
-                              onPressed: () {
-                                // TODO: Navigate to lesson screen when lessons feature is built
-                              },
-                              style: TextButton.styleFrom(
-                                minimumSize: Size.zero,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
+                            Text(
+                              recommendedLesson.localizedTitle(lang),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                              child: const Text('View Lesson'),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              recommendedLesson.localizedDescription(lang),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time_rounded,
+                                  size: 14,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${recommendedLesson.readingTimeMinutes} min',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const Spacer(),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => LessonDetailScreen(
+                                          lesson: recommendedLesson!,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    minimumSize: Size.zero,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(isTl ? 'Tingnan' : 'View Lesson'),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

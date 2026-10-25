@@ -9,6 +9,9 @@ import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/splash_screen.dart';
 import 'features/auth/services/auth_provider.dart';
+import 'features/lessons/data/local_lesson_repository.dart';
+import 'features/lessons/providers/lesson_provider.dart';
+import 'features/lessons/services/lesson_service.dart';
 import 'features/mood/models/mood_entry.dart';
 import 'features/mood/models/mood_type.dart';
 import 'features/mood/repositories/local_mood_repository.dart';
@@ -68,6 +71,26 @@ void main() async {
             return MoodProvider(
               MoodService(LocalMoodRepository()),
               userId,
+            );
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, LessonProvider>(
+          create: (_) => LessonProvider(
+            LessonService(
+              LocalLessonRepository(),
+              authProvider.currentUser?.id ?? 'local_user',
+            ),
+          ),
+          update: (_, auth, previous) {
+            if (previous != null) {
+              return previous;
+            }
+            final userId = auth.currentUser?.id ?? 'local_user';
+            return LessonProvider(
+              LessonService(
+                LocalLessonRepository(),
+                userId,
+              ),
             );
           },
         ),

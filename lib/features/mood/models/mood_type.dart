@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 /// The five moods a user can log in MomEase.
@@ -8,6 +8,8 @@ enum MoodType { veryHappy, happy, neutral, sad, verySad }
 const int kMoodTypeHiveId = 1;
 
 extension MoodTypeX on MoodType {
+  String get id => name;
+
   int get value {
     switch (this) {
       case MoodType.veryHappy: return 5;
