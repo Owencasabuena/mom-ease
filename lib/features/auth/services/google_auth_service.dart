@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/services/storage_service.dart';
 import '../models/user_model.dart';
 import 'auth_service.dart';
@@ -23,9 +25,12 @@ class GoogleAuthService implements AuthService {
   /// Track if Firebase has been initialized in this project runtime
   final bool isFirebaseReady;
 
+  final String? serverClientId;
+
   GoogleAuthService(
     this._storageService, {
     this.isFirebaseReady = false,
+    this.serverClientId,
   });
 
   /// Returns true if Firebase has been initialized and configured.
@@ -33,22 +38,19 @@ class GoogleAuthService implements AuthService {
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    // ------------------------------------------------------------------------
-    // TODO: [Firebase Setup Step 1]
-    // When Firebase is configured, check FirebaseAuth.instance.currentUser:
-    //
-    // final fbUser = FirebaseAuth.instance.currentUser;
-    // if (fbUser != null) {
-    //   return UserModel(
-    //     id: fbUser.uid,
-    //     displayName: fbUser.displayName ?? 'Mama',
-    //     email: fbUser.email,
-    //     photoUrl: fbUser.photoURL,
-    //     authType: AuthType.google,
-    //     createdAt: fbUser.metadata.creationTime ?? DateTime.now(),
-    //   );
-    // }
-    // ------------------------------------------------------------------------
+    if (isFirebaseReady) {
+      final fbUser = FirebaseAuth.instance.currentUser;
+      if (fbUser != null) {
+        return UserModel(
+          id: fbUser.uid,
+          displayName: fbUser.displayName ?? 'Mama',
+          email: fbUser.email,
+          photoUrl: fbUser.photoURL,
+          authType: AuthType.google,
+          createdAt: fbUser.metadata.creationTime ?? DateTime.now(),
+        );
+      }
+    }
 
     final savedUser = _storageService.getUser();
     if (savedUser != null && savedUser.isGoogle) {
@@ -59,50 +61,52 @@ class GoogleAuthService implements AuthService {
 
   @override
   Future<UserModel> signInWithGoogle() async {
-    // Check if Firebase is configured
     if (!isFirebaseReady) {
-      // Graceful fallback with clear development message
-      // Do NOT invent fake credentials or break the app
       throw const FirebaseNotConfiguredException(
         'Google Sign-In requires Firebase configuration.\n'
         'Please follow the setup steps in the documentation or continue locally.',
       );
     }
 
-    // ------------------------------------------------------------------------
-    // TODO: [Firebase Setup Step 2]
-    // When Firebase and Google Sign-In packages are installed:
-    // 1. Add packages: `flutter pub add firebase_core firebase_auth google_sign_in`
-    // 2. Add Android google-services.json & iOS GoogleService-Info.plist
-    // 3. Uncomment the implementation below:
-    //
-    // final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    // if (googleUser == null) {
-    //   throw Exception('Google sign-in was cancelled by user.');
-    // }
-    // final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    // final AuthCredential credential = GoogleAuthProvider.credential(
-    //   accessToken: googleAuth.accessToken,
-    //   idToken: googleAuth.idToken,
-    // );
-    // final UserCredential userCredential =
-    //     await FirebaseAuth.instance.signInWithCredential(credential);
-    // final User? user = userCredential.user;
-    // if (user == null) throw Exception('Failed to obtain user from Firebase.');
-    //
-    // final userModel = UserModel(
-    //   id: user.uid,
-    //   displayName: user.displayName ?? 'Mama',
-    //   email: user.email,
-    //   photoUrl: user.photoURL,
-    //   authType: AuthType.google,
-    //   createdAt: user.metadata.creationTime ?? DateTime.now(),
-    // );
-    // await _storageService.saveUser(userModel);
-    // return userModel;
-    // ------------------------------------------------------------------------
+    try {
+      final GoogleSignIn signIn = GoogleSignIn.instance;
+      await signIn.initialize(
+        serverClientId: serverClientId,
+      );
+      final GoogleSignInAccount googleUser = await signIn.authenticate();
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+      if (user == null) {
+        throw Exception('Failed to obtain user from Firebase.');
+      }
 
-    throw const FirebaseNotConfiguredException();
+      final userModel = UserModel(
+        id: user.uid,
+        displayName: user.displayName ?? googleUser.displayName ?? 'Mama',
+        email: user.email ?? googleUser.email,
+        photoUrl: user.photoURL ?? googleUser.photoUrl,
+        authType: AuthType.google,
+        createdAt: user.metadata.creationTime ?? DateTime.now(),
+      );
+      await _storageService.saveUser(userModel);
+      return userModel;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.clientConfigurationError) {
+        throw Exception(
+          'Google Sign-In Web Client ID (serverClientId) is missing.\n\n'
+          'Please ensure:\n'
+          '1. Google provider is enabled in Firebase Console (Authentication > Sign-in method)\n'
+          '2. SHA-1 fingerprint is added under Project Settings > Your apps\n'
+          '3. Re-download google-services.json into android/app/ (or provide serverClientId).',
+        );
+      }
+      throw Exception('Google Sign-In failed: ${e.description ?? e.code.name}');
+    }
   }
 
   @override
@@ -123,21 +127,24 @@ class GoogleAuthService implements AuthService {
 
   @override
   Future<void> signOut() async {
-    // ------------------------------------------------------------------------
-    // TODO: [Firebase Setup Step 3]
-    // await FirebaseAuth.instance.signOut();
-    // await GoogleSignIn().signOut();
-    // ------------------------------------------------------------------------
+    if (isFirebaseReady) {
+      try {
+        await FirebaseAuth.instance.signOut();
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
+    }
     await _storageService.clearUser();
   }
 
   @override
   Future<void> deleteAccount() async {
-    // ------------------------------------------------------------------------
-    // TODO: [Firebase Setup Step 4]
-    // final user = FirebaseAuth.instance.currentUser;
-    // await user?.delete();
-    // ------------------------------------------------------------------------
+    if (isFirebaseReady) {
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        await user?.delete();
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
+    }
     await _storageService.clearAll();
   }
 

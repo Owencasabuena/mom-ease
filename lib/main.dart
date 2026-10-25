@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 
+import 'firebase_options.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
@@ -17,6 +19,17 @@ import 'features/settings/services/theme_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase (fail-safe so local/offline mode is never blocked)
+  bool isFirebaseReady = false;
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    isFirebaseReady = true;
+  } catch (e) {
+    debugPrint('Firebase initialization notice: $e');
+  }
+
   // Initialize Hive local database
   await Hive.initFlutter();
   Hive.registerAdapter<MoodEntry>(MoodEntryAdapter());
@@ -27,7 +40,8 @@ void main() async {
   final storageService = await StorageService.initialize();
 
   // Initialize auth & theme providers
-  final authProvider = AuthProvider(storageService);
+  final authProvider =
+      AuthProvider(storageService, isFirebaseReady: isFirebaseReady);
   final themeProvider = ThemeProvider(storageService);
 
   // Hydrate auth state prior to UI render

@@ -21,9 +21,17 @@ class AuthProvider extends ChangeNotifier {
   bool _isInitialized = false;
   String? _errorMessage;
 
-  AuthProvider(this._storageService) {
+  AuthProvider(
+    this._storageService, {
+    bool isFirebaseReady = false,
+    String? serverClientId,
+  }) {
     _localAuthService = LocalAuthService(_storageService);
-    _googleAuthService = GoogleAuthService(_storageService);
+    _googleAuthService = GoogleAuthService(
+      _storageService,
+      isFirebaseReady: isFirebaseReady,
+      serverClientId: serverClientId,
+    );
   }
 
   // Getters

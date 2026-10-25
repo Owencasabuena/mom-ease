@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "624166568008",
+    "project_id": "mom-ease-9f004",
+    "storage_bucket": "mom-ease-9f004.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624166568008:android:e5ce517e362f2444d0587d",
+        "android_client_info": {
+          "package_name": "com.example.mom_ease"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "624166568008-obm1vdvfj2jl7jeb4gjq2j5n595jbc8s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mom_ease",
+            "certificate_hash": "4c72f430d19e2c29008f753252ce3b138dbdf0fa"
+          }
+        },
+        {
+          "client_id": "624166568008-98nb6r6lmq1mqblet4c16g72ln6s63qo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC32mRxWFWJfm4z_rvwApU748sQJJx7OQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "624166568008-98nb6r6lmq1mqblet4c16g72ln6s63qo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "624166568008-jlfi6hrdo6h4v4ddk6q5k38b8btfpj0l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.momEase"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624166568008:android:4a7a2840f447d4a4d0587d",
+        "android_client_info": {
+          "package_name": "com.example.momease"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "624166568008-98nb6r6lmq1mqblet4c16g72ln6s63qo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC32mRxWFWJfm4z_rvwApU748sQJJx7OQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "624166568008-98nb6r6lmq1mqblet4c16g72ln6s63qo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "624166568008-jlfi6hrdo6h4v4ddk6q5k38b8btfpj0l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.momEase"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
