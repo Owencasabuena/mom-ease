@@ -295,7 +295,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap header to expand
-      await tester.tap(find.byType(InkWell));
+      await tester.tap(find.byKey(const Key('month_header_expander')));
       await tester.pumpAndSettle();
 
       // Check SegmentedButton appears with Calendar and Summary
@@ -308,6 +308,19 @@ void main() {
 
       // Summary view displays
       expect(find.text('No mood check-ins yet this month.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'CalendarView in compact mode renders horizontal day strip cleanly',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget(const SingleChildScrollView(
+        child: CalendarView(),
+      )));
+      await tester.pumpAndSettle();
+
+      final today = DateTime.now();
+      expect(find.text('${today.day}'), findsWidgets);
       expect(tester.takeException(), isNull);
     });
   });

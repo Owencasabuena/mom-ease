@@ -6,7 +6,6 @@ import '../../../features/profile/screens/profile_screen.dart';
 import '../models/mood_type.dart';
 import '../state/mood_provider.dart';
 import '../widgets/calendar_view.dart';
-import '../widgets/date_selector.dart';
 import '../widgets/log_mood_bottom_sheet.dart';
 import '../widgets/suggested_lesson_card.dart';
 
@@ -67,7 +66,6 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(child: _DateHeader()),
-            const SliverToBoxAdapter(child: DateSelector()),
             const SliverToBoxAdapter(child: CalendarView()),
             SliverToBoxAdapter(child: _SelectedDayCard()),
             SliverToBoxAdapter(child: _LogButton()),
