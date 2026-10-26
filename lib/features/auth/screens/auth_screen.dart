@@ -87,25 +87,13 @@ class AuthScreen extends StatelessWidget {
                   Center(
                     child: Image.asset(
                       AppAssets.stackedLogo(context),
-                      height: 130,
+                      height: 140,
                       fit: BoxFit.contain,
                       semanticLabel: 'MomEase logo',
                     ),
                   ),
 
-                  const SizedBox(height: 12),
-
-                  Text(
-                    AppConstants.appName,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
 
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),

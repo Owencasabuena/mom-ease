@@ -131,8 +131,8 @@ void main() {
         await tester.pumpWidget(createTestWidget(const AuthScreen()));
         await tester.pumpAndSettle();
 
-        // Check header and tagline
-        expect(find.text('MomEase'), findsOneWidget);
+        // Check logo and tagline
+        expect(find.bySemanticsLabel('MomEase logo'), findsOneWidget);
         expect(
           find.text('Support for every step of your postpartum journey.'),
           findsOneWidget,
