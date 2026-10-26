@@ -5,6 +5,7 @@ import 'package:mom_ease/features/journal/data/journal_repository.dart';
 import 'package:mom_ease/features/journal/models/journal_entry.dart';
 import 'package:mom_ease/features/journal/models/journal_prompt.dart';
 import 'package:mom_ease/features/journal/providers/journal_provider.dart';
+import 'package:mom_ease/features/journal/screens/journal_detail_screen.dart';
 import 'package:mom_ease/features/journal/screens/journal_screen.dart';
 import 'package:mom_ease/features/journal/services/journal_prompt_service.dart';
 import 'package:mom_ease/features/journal/services/journal_service.dart';
@@ -815,6 +816,48 @@ void main() {
 
       await tester.tap(find.byType(VoiceInputButton));
       expect(pressed, isTrue);
+    });
+
+    testWidgets('JournalDetailScreen renders edited entry metadata without overflow', (tester) async {
+      final repo = _FakeJournalRepository();
+      final service = JournalService(repo, 'detail_user');
+      final provider = JournalProvider(service);
+      await provider.init();
+
+      final created = DateTime(2026, 10, 26, 8, 45);
+      final edited = DateTime(2026, 10, 26, 11, 16);
+      final entry = JournalEntry(
+        id: 'test_entry',
+        userId: 'detail_user',
+        date: created,
+        content: 'hello hello i am owen i\'m tired',
+        moodId: 'veryHappy',
+        inputMethod: JournalInputMethod.mixed,
+        createdAt: created,
+        updatedAt: edited,
+      );
+
+      await service.createEntry(entry);
+      await provider.init();
+
+      // Test with small mobile viewport width (340px)
+      tester.view.physicalSize = const Size(340 * 2.0, 700 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<JournalProvider>.value(
+          value: provider,
+          child: MaterialApp(
+            home: JournalDetailScreen(entry: entry),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Created Oct 26, 2026'), findsOneWidget);
+      expect(find.textContaining('Edited Oct 26, 2026'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }

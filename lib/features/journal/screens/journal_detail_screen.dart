@@ -164,15 +164,17 @@ class JournalDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Date and input method header
-            Row(
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 6,
               children: [
-                Expanded(
-                  child: Text(
-                    formattedDate,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
+                Text(
+                  formattedDate,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 if (currentEntry.inputMethod == JournalInputMethod.voice)
@@ -358,30 +360,41 @@ class JournalDetailScreen extends StatelessWidget {
             // Metadata: Created & Updated
             Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.schedule_rounded,
-                  size: 14,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Created ${DateFormat('MMM d, y h:mm a').format(currentEntry.createdAt)}',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                if (currentEntry.updatedAt.isAfter(currentEntry.createdAt.add(const Duration(seconds: 1)))) ...[
-                  const Text(' • '),
-                  Text(
-                    'Edited ${DateFormat('MMM d, y h:mm a').format(currentEntry.updatedAt)}',
-                    style: theme.textTheme.labelSmall?.copyWith(
+            Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Icon(
+                      Icons.schedule_rounded,
+                      size: 14,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  const TextSpan(text: ' '),
+                  TextSpan(
+                    text: 'Created ${DateFormat('MMM d, y h:mm a').format(currentEntry.createdAt)}',
+                  ),
+                  if (currentEntry.updatedAt.isAfter(currentEntry.createdAt.add(const Duration(seconds: 1)))) ...[
+                    const TextSpan(text: '  •  '),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Icon(
+                        Icons.edit_note_rounded,
+                        size: 15,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const TextSpan(text: ' '),
+                    TextSpan(
+                      text: 'Edited ${DateFormat('MMM d, y h:mm a').format(currentEntry.updatedAt)}',
+                    ),
+                  ],
                 ],
-              ],
+              ),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
 
             // Post-entry Lesson Suggestion (if linked mood has recommendation)
