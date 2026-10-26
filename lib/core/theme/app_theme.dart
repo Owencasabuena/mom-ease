@@ -61,7 +61,7 @@ abstract final class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textPrimary,
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(64, 48),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
           textStyle: AppTextStyles.button(color: AppColors.textPrimary),
@@ -71,7 +71,7 @@ abstract final class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textPrimary,
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(64, 48),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
           textStyle: AppTextStyles.button(color: AppColors.textPrimary),
@@ -80,7 +80,7 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.textPrimary,
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(64, 48),
           side: const BorderSide(color: AppColors.border, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
           textStyle: AppTextStyles.button(color: AppColors.textPrimary),
@@ -217,7 +217,7 @@ abstract final class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.darkBackground,
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(64, 48),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
           textStyle: AppTextStyles.button(color: AppColors.darkBackground),
@@ -227,7 +227,7 @@ abstract final class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.darkBackground,
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(64, 48),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
           textStyle: AppTextStyles.button(color: AppColors.darkBackground),
@@ -236,7 +236,7 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.darkTextPrimary,
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(64, 48),
           side: const BorderSide(color: AppColors.darkBorder, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
           textStyle: AppTextStyles.button(color: AppColors.darkTextPrimary),

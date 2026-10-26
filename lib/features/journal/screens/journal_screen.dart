@@ -489,6 +489,7 @@ class _JournalScreenState extends State<JournalScreen> {
                                   onPressed: () => _openEditor(),
                                   style: FilledButton.styleFrom(
                                     visualDensity: VisualDensity.compact,
+                                    minimumSize: const Size(0, 36),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 12,
                                     ),

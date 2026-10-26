@@ -6,6 +6,7 @@ import 'package:mom_ease/features/journal/models/journal_entry.dart';
 import 'package:mom_ease/features/journal/models/journal_prompt.dart';
 import 'package:mom_ease/features/journal/providers/journal_provider.dart';
 import 'package:mom_ease/features/journal/screens/journal_detail_screen.dart';
+import 'package:mom_ease/features/journal/screens/journal_editor_screen.dart';
 import 'package:mom_ease/features/journal/screens/journal_screen.dart';
 import 'package:mom_ease/features/journal/services/journal_prompt_service.dart';
 import 'package:mom_ease/features/journal/services/journal_service.dart';
@@ -921,6 +922,62 @@ void main() {
         expect(find.textContaining('Created Oct 26, 2026'), findsOneWidget);
         expect(find.textContaining('Edited Oct 26, 2026'), findsOneWidget);
         expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'JournalEditorScreen renders Back button and Save button reliably',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'editor_test_user');
+        final provider = JournalProvider(service);
+        await provider.init();
+
+        bool popped = false;
+
+        await tester.pumpWidget(
+          ChangeNotifierProvider<JournalProvider>.value(
+            value: provider,
+            child: MaterialApp(
+              home: Builder(
+                builder: (context) => Scaffold(
+                  body: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const JournalEditorScreen(),
+                        ),
+                      );
+                      popped = true;
+                    },
+                    child: const Text('Open Editor'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the editor screen
+        await tester.tap(find.text('Open Editor'));
+        await tester.pumpAndSettle();
+
+        // Verify Save and Back buttons exist
+        expect(find.text('Save'), findsOneWidget);
+        expect(find.byTooltip('Back'), findsOneWidget);
+
+        // Tapping Save with empty content shows friendly guidance
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Please write your thoughts before saving.'),
+          findsOneWidget,
+        );
+
+        // Tapping Back pops the editor
+        await tester.tap(find.byTooltip('Back'));
+        await tester.pumpAndSettle();
+        expect(popped, isTrue);
       },
     );
   });

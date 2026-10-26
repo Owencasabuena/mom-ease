@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 import '../../lessons/providers/lesson_provider.dart';
 import '../../mood/models/mood_type.dart';
 import '../../mood/state/mood_provider.dart';
@@ -277,6 +279,27 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     }
   }
 
+  void _saveDraftNow() {
+    _draftDebounce?.cancel();
+    if (widget.existingEntry != null) return;
+    final content = _contentController.text.trim();
+    final title = _titleController.text.trim();
+    if (content.isEmpty && title.isEmpty) return;
+
+    final provider = Provider.of<JournalProvider?>(context, listen: false);
+    if (provider != null) {
+      final draft = JournalDraft(
+        title: _titleController.text,
+        content: _contentController.text,
+        moodId: _selectedMood?.name,
+        promptId: _selectedPrompt?.id,
+        tags: _selectedTags,
+        updatedAt: DateTime.now(),
+      );
+      provider.saveDraft(draft);
+    }
+  }
+
   @override
   void dispose() {
     _draftDebounce?.cancel();
@@ -294,407 +317,452 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     final currentLang = lessonProvider?.currentLanguage ?? 'en';
     final hasContent = _contentController.text.trim().isNotEmpty;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          isEditing ? 'Edit Entry' : 'New Journal Entry',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          _saveDraftNow();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            tooltip: 'Back',
+            onPressed: () {
+              _saveDraftNow();
+              Navigator.of(context).maybePop();
+            },
           ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Semantics(
-              label: 'Save journal entry',
-              button: true,
-              child: FilledButton(
-                onPressed: (!hasContent || _isSaving) ? null : _saveEntry,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                ),
-                child: _isSaving
-                    ? SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                      )
-                    : const Text(
-                        'Save',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-              ),
+          title: Text(
+            isEditing ? 'Edit Entry' : 'New Journal Entry',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Date row
-            InkWell(
-              onTap: isEditing
-                  ? null
-                  : () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null) {
-                        setState(() => _selectedDate = picked);
-                      }
-                    },
-              borderRadius: BorderRadius.circular(10),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      size: 15,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (!isEditing) ...[
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_drop_down_rounded,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // Mood Selector Section
-            Text(
-              'How are you feeling?',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            JournalMoodSelector(
-              selectedMood: _selectedMood,
-              onMoodSelected: (m) => setState(() => _selectedMood = m),
-            ),
-            const SizedBox(height: 16),
-
-            // Reflection Prompt Section (Secondary action, prominent question)
-            if (_selectedPrompt != null) ...[
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.secondaryContainer.withValues(
-                    alpha: 0.35,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.colorScheme.secondary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.lightbulb_outline_rounded,
-                          size: 16,
-                          color: theme.colorScheme.secondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Reflection Prompt',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () async {
-                            final p = await PromptSelectorSheet.show(
-                              context,
-                              language: currentLang,
-                              currentMoodId: _selectedMood?.name,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Semantics(
+                label: 'Save journal entry',
+                button: true,
+                child: FilledButton(
+                  onPressed: _isSaving
+                      ? null
+                      : () {
+                          if (!hasContent) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Please write your thoughts before saving.',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                duration: Duration(seconds: 2),
+                              ),
                             );
-                            if (p != null) {
-                              setState(() => _selectedPrompt = p);
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            return;
+                          }
+                          _saveEntry();
+                        },
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(64, 38),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.textPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isSaving
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.colorScheme.onPrimary,
                           ),
-                          child: const Text('Change'),
+                        )
+                      : const Text(
+                          'Save',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.close_rounded, size: 16),
-                          tooltip: 'Remove prompt',
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          onPressed: () =>
-                              setState(() => _selectedPrompt = null),
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date row
+              InkWell(
+                onTap: isEditing
+                    ? null
+                    : () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDate,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setState(() => _selectedDate = picked);
+                        }
+                      },
+                borderRadius: BorderRadius.circular(10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 15,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (!isEditing) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: theme.colorScheme.primary,
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _selectedPrompt!.localizedText(currentLang),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSecondaryContainer,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-            ] else ...[
-              OutlinedButton.icon(
-                onPressed: () async {
-                  final prompt = await PromptSelectorSheet.show(
-                    context,
-                    language: currentLang,
-                    currentMoodId: _selectedMood?.name,
-                  );
-                  if (prompt != null) {
-                    setState(() => _selectedPrompt = prompt);
-                  }
-                },
-                icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
-                label: const Text('+ Add a Reflection Prompt'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 44),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    ],
                   ),
                 ),
               ),
               const SizedBox(height: 14),
-            ],
 
-            // Optional Title Field
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                hintText: 'Title (optional)',
-                hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(
-                    alpha: 0.6,
-                  ),
-                ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerLow,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: 0.4,
-                    ),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: 0.4,
-                    ),
-                  ),
+              // Mood Selector Section
+              Text(
+                'How are you feeling?',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 14),
+              const SizedBox(height: 8),
+              JournalMoodSelector(
+                selectedMood: _selectedMood,
+                onMoodSelected: (m) => setState(() => _selectedMood = m),
+              ),
+              const SizedBox(height: 16),
 
-            // Large Journal Text Field with integrated microphone control
-            AnimatedBuilder(
-              animation: _speechService,
-              builder: (context, _) {
-                final isListening = _speechService.isListening;
-                final isProcessing =
-                    _speechService.status == SpeechStatus.processing;
-
-                return Container(
+              // Reflection Prompt Section (Secondary action, prominent question)
+              if (_selectedPrompt != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(20),
+                    color: theme.colorScheme.secondaryContainer.withValues(
+                      alpha: 0.35,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isListening
-                          ? theme.colorScheme.error
-                          : theme.colorScheme.outlineVariant.withValues(
-                              alpha: 0.4,
-                            ),
-                      width: isListening ? 1.5 : 1,
+                      color: theme.colorScheme.secondary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextField(
-                        controller: _contentController,
-                        minLines: 8,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                          hintText: "Write anything that's on your mind...",
-                          hintStyle: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant
-                                .withValues(alpha: 0.6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline_rounded,
+                            size: 16,
+                            color: theme.colorScheme.secondary,
                           ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.fromLTRB(
-                            16,
-                            16,
-                            16,
-                            8,
+                          const SizedBox(width: 6),
+                          Text(
+                            'Reflection Prompt',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.secondary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        textCapitalization: TextCapitalization.sentences,
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () async {
+                              final p = await PromptSelectorSheet.show(
+                                context,
+                                language: currentLang,
+                                currentMoodId: _selectedMood?.name,
+                              );
+                              if (p != null) {
+                                setState(() => _selectedPrompt = p);
+                              }
+                            },
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                            ),
+                            child: const Text('Change'),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, size: 16),
+                            tooltip: 'Remove prompt',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () =>
+                                setState(() => _selectedPrompt = null),
+                          ),
+                        ],
                       ),
-                      // Bottom bar inside editor for mic / speech status
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                        child: Row(
-                          children: [
-                            if (isListening) ...[
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: theme.colorScheme.error,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Listening...',
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: theme.colorScheme.error,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              Semantics(
-                                label: 'Stop voice input',
-                                button: true,
-                                child: IconButton.filled(
-                                  onPressed: _toggleSpeech,
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: theme.colorScheme.error,
-                                    foregroundColor: theme.colorScheme.onError,
-                                    minimumSize: const Size(40, 40),
-                                  ),
-                                  icon: const Icon(
-                                    Icons.stop_rounded,
-                                    size: 20,
-                                  ),
-                                  tooltip: 'Stop voice input',
-                                ),
-                              ),
-                            ] else if (isProcessing) ...[
-                              const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Finishing transcription...',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              const Spacer(),
-                            ] else if (_speechService.status ==
-                                SpeechStatus.permissionDenied) ...[
-                              Icon(
-                                Icons.mic_off_rounded,
-                                size: 16,
-                                color: theme.colorScheme.error,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  'Microphone permission needed',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: theme.colorScheme.error,
-                                  ),
-                                ),
-                              ),
-                            ] else ...[
-                              const Spacer(),
-                              Semantics(
-                                label: 'Start voice input',
-                                button: true,
-                                child: IconButton.filledTonal(
-                                  onPressed: _toggleSpeech,
-                                  style: IconButton.styleFrom(
-                                    minimumSize: const Size(40, 40),
-                                  ),
-                                  icon: const Icon(Icons.mic_rounded, size: 20),
-                                  tooltip: 'Start voice input',
-                                ),
-                              ),
-                            ],
-                          ],
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedPrompt!.localizedText(currentLang),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSecondaryContainer,
                         ),
                       ),
                     ],
                   ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 14),
+              ] else ...[
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final prompt = await PromptSelectorSheet.show(
+                      context,
+                      language: currentLang,
+                      currentMoodId: _selectedMood?.name,
+                    );
+                    if (prompt != null) {
+                      setState(() => _selectedPrompt = prompt);
+                    }
+                  },
+                  icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
+                  label: const Text('+ Add a Reflection Prompt'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
 
-            // Tags selector
-            Text(
-              'Tags',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.bold,
+              // Optional Title Field
+              TextField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  hintText: 'Title (optional)',
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.6,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerLow,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.4,
+                      ),
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.4,
+                      ),
+                    ),
+                  ),
+                ),
+                textCapitalization: TextCapitalization.sentences,
               ),
-            ),
-            const SizedBox(height: 8),
-            Consumer<JournalProvider>(
-              builder: (context, journalProvider, _) {
-                return TagSelector(
-                  availableTags: journalProvider.availableTags,
-                  selectedTags: _selectedTags,
-                  onTagsChanged: (tags) => setState(() => _selectedTags = tags),
-                  onAddCustomTag: (tag) => journalProvider.addCustomTag(tag),
-                );
-              },
-            ),
-            const SizedBox(height: 40),
-          ],
+              const SizedBox(height: 14),
+
+              // Large Journal Text Field with integrated microphone control
+              AnimatedBuilder(
+                animation: _speechService,
+                builder: (context, _) {
+                  final isListening = _speechService.isListening;
+                  final isProcessing =
+                      _speechService.status == SpeechStatus.processing;
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isListening
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.outlineVariant.withValues(
+                                alpha: 0.4,
+                              ),
+                        width: isListening ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: _contentController,
+                          minLines: 8,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            hintText: "Write anything that's on your mind...",
+                            hintStyle: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.6),
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.fromLTRB(
+                              16,
+                              16,
+                              16,
+                              8,
+                            ),
+                          ),
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                        // Bottom bar inside editor for mic / speech status
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                          child: Row(
+                            children: [
+                              if (isListening) ...[
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Listening...',
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: theme.colorScheme.error,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Semantics(
+                                  label: 'Stop voice input',
+                                  button: true,
+                                  child: IconButton.filled(
+                                    onPressed: _toggleSpeech,
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: theme.colorScheme.error,
+                                      foregroundColor:
+                                          theme.colorScheme.onError,
+                                      minimumSize: const Size(40, 40),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.stop_rounded,
+                                      size: 20,
+                                    ),
+                                    tooltip: 'Stop voice input',
+                                  ),
+                                ),
+                              ] else if (isProcessing) ...[
+                                const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Finishing transcription...',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const Spacer(),
+                              ] else if (_speechService.status ==
+                                  SpeechStatus.permissionDenied) ...[
+                                Icon(
+                                  Icons.mic_off_rounded,
+                                  size: 16,
+                                  color: theme.colorScheme.error,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    'Microphone permission needed',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ] else ...[
+                                const Spacer(),
+                                Semantics(
+                                  label: 'Start voice input',
+                                  button: true,
+                                  child: IconButton.filledTonal(
+                                    onPressed: _toggleSpeech,
+                                    style: IconButton.styleFrom(
+                                      minimumSize: const Size(40, 40),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.mic_rounded,
+                                      size: 20,
+                                    ),
+                                    tooltip: 'Start voice input',
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Tags selector
+              Text(
+                'Tags',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Consumer<JournalProvider>(
+                builder: (context, journalProvider, _) {
+                  return TagSelector(
+                    availableTags: journalProvider.availableTags,
+                    selectedTags: _selectedTags,
+                    onTagsChanged: (tags) =>
+                        setState(() => _selectedTags = tags),
+                    onAddCustomTag: (tag) => journalProvider.addCustomTag(tag),
+                  );
+                },
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
