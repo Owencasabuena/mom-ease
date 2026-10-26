@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../journal/screens/journal_screen.dart';
 import '../../lessons/screens/lessons_screen.dart';
 import '../../mood/screens/mood_tracker_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 
-/// Primary shell hosting bottom navigation between Mood Tracker, Lessons, and Profile.
+/// Primary shell hosting bottom navigation between Mood Tracker, Lessons, Journal, and Profile.
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
 
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = const [
     MoodTrackerScreen(),
     LessonsScreen(),
+    JournalScreen(),
     ProfileScreen(),
   ];
 
@@ -60,6 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.menu_book_outlined),
             selectedIcon: Icon(Icons.menu_book_rounded),
             label: 'Lessons',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.edit_note_outlined),
+            selectedIcon: Icon(Icons.edit_note_rounded),
+            label: 'Journal',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),

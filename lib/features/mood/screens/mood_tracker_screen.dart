@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../features/auth/services/auth_provider.dart';
 import '../../../features/profile/screens/profile_screen.dart';
+import '../../journal/screens/journal_editor_screen.dart';
 import '../models/mood_type.dart';
 import '../state/mood_provider.dart';
 import '../widgets/calendar_view.dart';
@@ -148,47 +149,90 @@ class _SelectedDayCard extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.asset(
-                entryMood.assetPath,
-                width: 52,
-                height: 52,
-                errorBuilder: (_, e, s) => Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: entryMood.color.withValues(alpha: 0.3),
+              Row(
+                children: [
+                  Image.asset(
+                    entryMood.assetPath,
+                    width: 52,
+                    height: 52,
+                    errorBuilder: (_, e, s) => Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: entryMood.color.withValues(alpha: 0.3),
+                      ),
+                      child: Icon(Icons.sentiment_neutral,
+                          color: entryMood.color, size: 32),
+                    ),
                   ),
-                  child: Icon(Icons.sentiment_neutral,
-                      color: entryMood.color, size: 32),
-                ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Your mood',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            )),
+                        Text(entryMood.label,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            )),
+                        if (entry.note != null && entry.note!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(entry.note!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Your mood',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        )),
-                    Text(entryMood.label,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        )),
-                    if (entry.note != null && entry.note!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(entry.note!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+              const SizedBox(height: 10),
+              Divider(height: 1, color: entryMood.color.withValues(alpha: 0.2)),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(
+                    Icons.edit_note_rounded,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Want to write about it?',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => JournalEditorScreen(
+                            initialDate: mood.selectedDate,
+                            initialMood: entryMood,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
-                    ],
-                  ],
-                ),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    ),
+                    child: const Text('Add Journal Entry'),
+                  ),
+                ],
               ),
             ],
           ),

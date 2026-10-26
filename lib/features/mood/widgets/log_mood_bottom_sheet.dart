@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../journal/screens/journal_editor_screen.dart';
 import '../models/mood_type.dart';
 import '../state/mood_provider.dart';
 
@@ -50,19 +51,43 @@ class _LogMoodSheetState extends State<_LogMoodSheet> {
     );
     if (!mounted) return;
     setState(() => _saving = false);
-    Navigator.of(context).pop();
+
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final messenger = ScaffoldMessenger.of(context);
+    final savedMood = _selected;
+    final selectedDate = provider.selectedDate;
+
+    navigator.pop();
+
     if (err == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
         SnackBar(
           content: const Text('Mood saved.'),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(milliseconds: 2500),
+          showCloseIcon: true,
+          dismissDirection: DismissDirection.horizontal,
+          action: SnackBarAction(
+            label: 'Write',
+            onPressed: () {
+              messenger.hideCurrentSnackBar();
+              navigator.push(
+                MaterialPageRoute(
+                  builder: (_) => JournalEditorScreen(
+                    initialDate: selectedDate,
+                    initialMood: savedMood,
+                  ),
+                ),
+              );
+            },
+          ),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(err),
           backgroundColor: Theme.of(context).colorScheme.error,

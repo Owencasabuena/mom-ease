@@ -2,7 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 /// The five moods a user can log in MomEase.
-enum MoodType { veryHappy, happy, neutral, sad, verySad }
+enum MoodType {
+  veryHappy,
+  happy,
+  neutral,
+  sad,
+  verySad;
+
+  static MoodType? fromId(String? id) {
+    if (id == null) return null;
+    for (final m in MoodType.values) {
+      if (m.name == id) return m;
+    }
+    return null;
+  }
+}
 
 /// Hive typeId used by MoodTypeAdapter.
 const int kMoodTypeHiveId = 1;
@@ -50,6 +64,16 @@ extension MoodTypeX on MoodType {
     }
   }
 
+  String get emoji {
+    switch (this) {
+      case MoodType.veryHappy: return '😊';
+      case MoodType.happy:     return '🙂';
+      case MoodType.neutral:   return '😐';
+      case MoodType.sad:       return '😔';
+      case MoodType.verySad:   return '😢';
+    }
+  }
+
   static MoodType fromValue(int v) {
     switch (v) {
       case 5:  return MoodType.veryHappy;
@@ -58,6 +82,14 @@ extension MoodTypeX on MoodType {
       case 2:  return MoodType.sad;
       default: return MoodType.verySad;
     }
+  }
+
+  static MoodType? fromId(String? id) {
+    if (id == null) return null;
+    for (final m in MoodType.values) {
+      if (m.name == id) return m;
+    }
+    return null;
   }
 }
 

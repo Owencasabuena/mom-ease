@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/screens/auth_screen.dart';
 import '../../auth/services/auth_provider.dart';
+import '../../journal/providers/journal_provider.dart';
 import '../../settings/screens/about_screen.dart';
 import '../../settings/services/theme_provider.dart';
 import '../widgets/change_pin_dialog.dart';
@@ -32,6 +33,138 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (_) => const DeleteAccountDialog(),
     );
+  }
+
+  void _toggleJournalLock(BuildContext context, bool enable) async {
+    final journalProvider = Provider.of<JournalProvider?>(context, listen: false);
+    if (journalProvider == null) return;
+
+    if (enable) {
+      final pinController = TextEditingController();
+      final formKey = GlobalKey<FormState>();
+      final pin = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Set Journal Lock PIN'),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Set a 4-digit PIN to secure your private journal entries.',
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: pinController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  obscureText: true,
+                  textAlign: TextAlign.center,
+                  decoration: const InputDecoration(
+                    hintText: '••••',
+                    counterText: '',
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().length != 4) {
+                      return 'PIN must be 4 digits';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(null),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState?.validate() == true) {
+                  Navigator.of(ctx).pop(pinController.text.trim());
+                }
+              },
+              child: const Text('Enable Lock'),
+            ),
+          ],
+        ),
+      );
+
+      if (pin != null && pin.isNotEmpty && context.mounted) {
+        await journalProvider.saveLockPin(pin);
+        await journalProvider.setLockEnabled(true);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Journal Lock enabled with PIN.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } else {
+      final pinController = TextEditingController();
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Disable Journal Lock'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Enter your current PIN to turn off Journal Lock:'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: pinController,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                obscureText: true,
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(
+                  hintText: '••••',
+                  counterText: '',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final valid = await journalProvider.verifyAndUnlock(pinController.text.trim());
+                if (ctx.mounted) {
+                  Navigator.of(ctx).pop(valid);
+                }
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && context.mounted) {
+        await journalProvider.setLockEnabled(false);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Journal Lock disabled.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } else if (confirmed == false && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Incorrect PIN. Journal Lock remains active.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _handleGoogleUpgrade(BuildContext context) async {
@@ -551,6 +684,29 @@ class ProfileScreen extends StatelessWidget {
                           subtitle: const Text('On-device data guarantee'),
                           trailing: const Icon(Icons.chevron_right_rounded),
                           onTap: () => _showPrivacyInfo(context),
+                        ),
+                        const Divider(),
+
+                        // Journal App Lock
+                        Builder(
+                          builder: (context) {
+                            final journalProvider = Provider.of<JournalProvider?>(context);
+                            final isLockEnabled = journalProvider?.isLockEnabled ?? false;
+                            return ListTile(
+                              leading: const Icon(Icons.lock_person_outlined),
+                              title: const Text('Journal Lock'),
+                              subtitle: Text(
+                                isLockEnabled
+                                    ? 'PIN protection active'
+                                    : 'Off (protect entries with 4-digit PIN)',
+                              ),
+                              trailing: Switch(
+                                value: isLockEnabled,
+                                onChanged: (enabled) =>
+                                    _toggleJournalLock(context, enabled),
+                              ),
+                            );
+                          },
                         ),
                         const Divider(),
 

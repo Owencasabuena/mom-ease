@@ -9,6 +9,10 @@ import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/splash_screen.dart';
 import 'features/auth/services/auth_provider.dart';
+import 'features/journal/data/local_journal_repository.dart';
+import 'features/journal/models/journal_entry.dart';
+import 'features/journal/providers/journal_provider.dart';
+import 'features/journal/services/journal_service.dart';
 import 'features/lessons/data/local_lesson_repository.dart';
 import 'features/lessons/providers/lesson_provider.dart';
 import 'features/lessons/services/lesson_service.dart';
@@ -37,7 +41,9 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter<MoodEntry>(MoodEntryAdapter());
   Hive.registerAdapter<MoodType>(MoodTypeAdapter());
+  Hive.registerAdapter<JournalEntry>(JournalEntryAdapter());
   await Hive.openBox<MoodEntry>('moodBox');
+  await Hive.openBox<JournalEntry>('journalBox');
 
   // Initialize persistent storage (SharedPreferences + FlutterSecureStorage)
   final storageService = await StorageService.initialize();
@@ -90,6 +96,28 @@ void main() async {
               LessonService(
                 LocalLessonRepository(),
                 userId,
+              ),
+            );
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, JournalProvider>(
+          create: (_) => JournalProvider(
+            JournalService(
+              LocalJournalRepository(),
+              authProvider.currentUser?.id ?? 'local_user',
+              storageService,
+            ),
+          ),
+          update: (_, auth, previous) {
+            if (previous != null) {
+              return previous;
+            }
+            final userId = auth.currentUser?.id ?? 'local_user';
+            return JournalProvider(
+              JournalService(
+                LocalJournalRepository(),
+                userId,
+                storageService,
               ),
             );
           },

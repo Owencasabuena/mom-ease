@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>MomEase needs microphone access for voice journaling.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>MomEase uses speech recognition to transcribe your voice journal entries.</string>
 </dict>
 </plist>
