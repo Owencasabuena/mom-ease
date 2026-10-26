@@ -980,5 +980,145 @@ void main() {
         expect(popped, isTrue);
       },
     );
+
+    testWidgets(
+      'JournalEditorScreen prompts to discard when text is typed and Back is tapped',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'discard_test_user');
+        final provider = JournalProvider(service);
+        await provider.init();
+
+        bool popped = false;
+
+        await tester.pumpWidget(
+          ChangeNotifierProvider<JournalProvider>.value(
+            value: provider,
+            child: MaterialApp(
+              home: Builder(
+                builder: (context) => Scaffold(
+                  body: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const JournalEditorScreen(),
+                        ),
+                      );
+                      popped = true;
+                    },
+                    child: const Text('Open Editor'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open editor
+        await tester.tap(find.text('Open Editor'));
+        await tester.pumpAndSettle();
+
+        // Type something in content
+        await tester.enterText(
+          find.byType(TextField).last,
+          'Some thoughts written here',
+        );
+        await tester.pumpAndSettle();
+
+        // Tap Back
+        await tester.tap(find.byTooltip('Back'));
+        await tester.pumpAndSettle();
+
+        // Verify discard dialog is shown
+        expect(find.text('Discard entry?'), findsOneWidget);
+        expect(find.text('Keep Editing'), findsOneWidget);
+        expect(find.text('Discard'), findsOneWidget);
+
+        // Tap Keep Editing
+        await tester.tap(find.text('Keep Editing'));
+        await tester.pumpAndSettle();
+        expect(popped, isFalse);
+        expect(find.text('Discard entry?'), findsNothing);
+
+        // Tap Back again
+        await tester.tap(find.byTooltip('Back'));
+        await tester.pumpAndSettle();
+        expect(find.text('Discard entry?'), findsOneWidget);
+
+        // Tap Discard
+        await tester.tap(find.text('Discard'));
+        await tester.pumpAndSettle();
+        expect(popped, isTrue);
+
+        // Verify NO draft was saved
+        expect(
+          provider.savedDraft == null || provider.savedDraft!.isEmpty,
+          isTrue,
+        );
+      },
+    );
+
+    testWidgets(
+      'Saving entry in JournalEditorScreen leaves no unfinished entry draft behind',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'save_no_draft_user');
+        final provider = JournalProvider(service);
+        await provider.init();
+
+        bool popped = false;
+
+        await tester.pumpWidget(
+          ChangeNotifierProvider<JournalProvider>.value(
+            value: provider,
+            child: MaterialApp(
+              home: Builder(
+                builder: (context) => Scaffold(
+                  body: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const JournalEditorScreen(),
+                        ),
+                      );
+                      popped = true;
+                    },
+                    child: const Text('Open Editor'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open editor
+        await tester.tap(find.text('Open Editor'));
+        await tester.pumpAndSettle();
+
+        // Type something in content
+        await tester.enterText(
+          find.byType(TextField).last,
+          'My saved reflection',
+        );
+        await tester.pumpAndSettle();
+
+        // Tap Save
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        // Screen popped
+        expect(popped, isTrue);
+
+        // Entry is in entries list
+        expect(provider.allEntries.length, equals(1));
+        expect(provider.allEntries.first.content, equals('My saved reflection'));
+
+        // No unfinished draft
+        expect(
+          provider.savedDraft == null || provider.savedDraft!.isEmpty,
+          isTrue,
+        );
+      },
+    );
   });
 }

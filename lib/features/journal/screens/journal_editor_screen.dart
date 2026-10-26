@@ -12,8 +12,6 @@ import '../../mood/state/mood_provider.dart';
 import '../models/journal_entry.dart';
 import '../models/journal_prompt.dart';
 import '../providers/journal_provider.dart';
-import '../services/journal_prompt_service.dart';
-import '../services/journal_service.dart';
 import '../services/speech_service.dart';
 import '../widgets/journal_mood_selector.dart';
 import '../widgets/prompt_selector.dart';
@@ -51,8 +49,8 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
 
   bool _isVoiceUsed = false;
   bool _isTypingUsed = false;
-  Timer? _draftDebounce;
   bool _isSaving = false;
+  bool _isSaved = false;
 
   @override
   void initState() {
@@ -99,15 +97,14 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
       }
     }
 
-    // Check for unfinished draft (only if creating a new entry)
+    // Clear any previous draft when opening new entry
     if (widget.existingEntry == null) {
       final journalProvider = Provider.of<JournalProvider?>(
         context,
         listen: false,
       );
-      final draft = journalProvider?.savedDraft;
-      if (draft != null && !draft.isEmpty && mounted) {
-        _promptRestoreDraft(draft);
+      if (journalProvider?.savedDraft != null) {
+        journalProvider?.discardDraft();
       }
     }
 
@@ -121,72 +118,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     }
   }
 
-  void _promptRestoreDraft(JournalDraft draft) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Continue Unfinished Entry?'),
-        content: const Text(
-          'You have a saved draft from an earlier session. Would you like to continue editing it or discard it?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              context.read<JournalProvider>().discardDraft();
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('Discard'),
-          ),
-          FilledButton(
-            onPressed: () {
-              setState(() {
-                _titleController.text = draft.title;
-                _contentController.text = draft.content;
-                if (draft.moodId != null) {
-                  try {
-                    _selectedMood = MoodType.values.firstWhere(
-                      (m) => m.name == draft.moodId,
-                    );
-                  } catch (_) {}
-                }
-                if (draft.promptId != null) {
-                  _selectedPrompt = JournalPromptService().getPromptById(
-                    draft.promptId!,
-                  );
-                }
-                _selectedTags = List.from(draft.tags);
-              });
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('Continue'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _onContentChanged() {
     _isTypingUsed = true;
     setState(() {}); // Updates Save button state reactively
-
-    // Debounce draft autosave by 1.5 seconds
-    _draftDebounce?.cancel();
-    _draftDebounce = Timer(const Duration(milliseconds: 1500), () {
-      if (!mounted || widget.existingEntry != null) return;
-      final provider = Provider.of<JournalProvider?>(context, listen: false);
-      if (provider != null) {
-        final draft = JournalDraft(
-          title: _titleController.text,
-          content: _contentController.text,
-          moodId: _selectedMood?.name,
-          promptId: _selectedPrompt?.id,
-          tags: _selectedTags,
-          updatedAt: DateTime.now(),
-        );
-        provider.saveDraft(draft);
-      }
-    });
   }
 
   void _toggleSpeech() {
@@ -229,7 +163,6 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     if (content.isEmpty) return;
 
     setState(() => _isSaving = true);
-    _draftDebounce?.cancel();
 
     if (_speechService.isListening) {
       await _speechService.stopListening();
@@ -258,9 +191,15 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     final success = await provider.saveEntry(entry);
     if (!mounted) return;
 
-    setState(() => _isSaving = false);
+    setState(() {
+      _isSaving = false;
+      if (success) _isSaved = true;
+    });
 
     if (success) {
+      await provider.discardDraft();
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Journal entry saved.'),
@@ -279,30 +218,79 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     }
   }
 
-  void _saveDraftNow() {
-    _draftDebounce?.cancel();
-    if (widget.existingEntry != null) return;
-    final content = _contentController.text.trim();
-    final title = _titleController.text.trim();
-    if (content.isEmpty && title.isEmpty) return;
+  bool get _hasUnsavedChanges {
+    if (_isSaved) return false;
+    final currentTitle = _titleController.text.trim();
+    final currentContent = _contentController.text.trim();
 
-    final provider = Provider.of<JournalProvider?>(context, listen: false);
-    if (provider != null) {
-      final draft = JournalDraft(
-        title: _titleController.text,
-        content: _contentController.text,
-        moodId: _selectedMood?.name,
-        promptId: _selectedPrompt?.id,
-        tags: _selectedTags,
-        updatedAt: DateTime.now(),
-      );
-      provider.saveDraft(draft);
+    if (widget.existingEntry == null) {
+      return currentTitle.isNotEmpty || currentContent.isNotEmpty;
+    } else {
+      final initialTitle = widget.existingEntry!.title?.trim() ?? '';
+      final initialContent = widget.existingEntry!.content.trim();
+      final initialMood = widget.existingEntry!.mood;
+      final initialTags = widget.existingEntry!.tags;
+
+      final isTagsDifferent =
+          _selectedTags.length != initialTags.length ||
+          !_selectedTags.every((t) => initialTags.contains(t));
+
+      return currentTitle != initialTitle ||
+          currentContent != initialContent ||
+          _selectedMood != initialMood ||
+          isTagsDifferent;
+    }
+  }
+
+  Future<bool> _confirmDiscard() async {
+    final theme = Theme.of(context);
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Discard entry?'),
+        content: const Text(
+          'You have typed something in your entry. Are you sure you want to discard it and go back?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Keep Editing'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Future<void> _handleBack() async {
+    if (_hasUnsavedChanges) {
+      final shouldDiscard = await _confirmDiscard();
+      if (shouldDiscard && mounted) {
+        final provider = Provider.of<JournalProvider?>(context, listen: false);
+        await provider?.discardDraft();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+    } else {
+      final provider = Provider.of<JournalProvider?>(context, listen: false);
+      await provider?.discardDraft();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
   @override
   void dispose() {
-    _draftDebounce?.cancel();
     _titleController.dispose();
     _contentController.dispose();
     _speechService.dispose();
@@ -318,21 +306,17 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     final hasContent = _contentController.text.trim().isNotEmpty;
 
     return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          _saveDraftNow();
-        }
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _handleBack();
       },
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             tooltip: 'Back',
-            onPressed: () {
-              _saveDraftNow();
-              Navigator.of(context).maybePop();
-            },
+            onPressed: _handleBack,
           ),
           title: Text(
             isEditing ? 'Edit Entry' : 'New Journal Entry',
