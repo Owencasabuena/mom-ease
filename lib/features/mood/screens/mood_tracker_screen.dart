@@ -94,14 +94,29 @@ class _DateHeader extends StatelessWidget {
         mood.selectedDate.day == today.day;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Text(
-        isToday
-            ? 'Today, ${DateFormat('d MMMM yyyy').format(today)}'
-            : DateFormat('EEEE, d MMMM yyyy').format(mood.selectedDate),
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      child: Row(
+        children: [
+          Text(
+            DateFormat('EEEE, MMMM d').format(mood.selectedDate),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          if (!isToday) ...[
+            const Spacer(),
+            TextButton.icon(
+              onPressed: () => mood.selectDate(today),
+              icon: const Icon(Icons.today_rounded, size: 16),
+              label: const Text('Today'),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -113,39 +128,86 @@ class _SelectedDayCard extends StatelessWidget {
     final mood = context.watch<MoodProvider>();
     final theme = Theme.of(context);
     final entry = mood.selectedEntry;
+    final today = DateTime.now();
+    final isToday = mood.selectedDate.year == today.year &&
+        mood.selectedDate.month == today.month &&
+        mood.selectedDate.day == today.day;
 
+    // Case 1: No mood logged yet for selected date
     if (entry == null) {
       final isFuture = mood.isFutureDate;
+      if (isFuture) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              'You can log your mood when this day arrives.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
+
+      // Warm, inviting prompt to check in
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            isFuture
-                ? 'You can log your mood when this day arrives.'
-                : 'No mood logged yet.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
             ),
-            textAlign: TextAlign.center,
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.spa_rounded,
+                size: 26,
+                color: theme.colorScheme.primary.withValues(alpha: 0.8),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isToday ? 'How are you feeling today?' : 'How were you feeling?',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Take a gentle moment to check in with yourself.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       );
     }
 
+    // Case 2: Mood logged (Today's Mood Hero Card)
     final entryMood = entry.mood;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Card(
         elevation: 0,
         color: entryMood.color.withValues(alpha: 0.12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: entryMood.color.withValues(alpha: 0.4)),
+          side: BorderSide(color: entryMood.color.withValues(alpha: 0.35)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -174,48 +236,59 @@ class _SelectedDayCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Your mood',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            )),
-                        Text(entryMood.label,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            )),
+                        Text(
+                          isToday
+                              ? "Today's mood"
+                              : DateFormat('MMMM d').format(mood.selectedDate),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          entryMood.label,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: entryMood.color,
+                          ),
+                        ),
                         if (entry.note != null && entry.note!.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          Text(entry.note!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis),
+                          Text(
+                            entry.note!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Divider(height: 1, color: entryMood.color.withValues(alpha: 0.2)),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
+              // Actions row: Update Mood (secondary button) + Add Journal Entry (tertiary link)
               Row(
                 children: [
-                  Icon(
-                    Icons.edit_note_rounded,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Want to write about it?',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
+                  OutlinedButton.icon(
+                    onPressed: () => showLogMoodSheet(context,
+                        preselected: entryMood),
+                    icon: const Icon(Icons.edit_outlined, size: 16),
+                    label: const Text('Update Mood'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 38),
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                   const Spacer(),
-                  TextButton(
+                  TextButton.icon(
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -226,11 +299,17 @@ class _SelectedDayCard extends StatelessWidget {
                         ),
                       );
                     },
+                    icon: Icon(
+                      Icons.edit_note_rounded,
+                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    label: const Text('Add Journal Entry'),
                     style: TextButton.styleFrom(
                       visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      foregroundColor: theme.colorScheme.onSurfaceVariant,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
-                    child: const Text('Add Journal Entry'),
                   ),
                 ],
               ),
@@ -247,18 +326,22 @@ class _LogButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final mood = context.watch<MoodProvider>();
     final isFuture = mood.isFutureDate;
+    if (isFuture) return const SizedBox.shrink();
+
+    // When mood is already logged, the update button is already cleanly integrated inside _SelectedDayCard
+    if (mood.selectedEntry != null) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: FilledButton.icon(
-        onPressed: isFuture
-            ? null
-            : () => showLogMoodSheet(context,
-                preselected: mood.selectedEntry?.mood),
+        onPressed: () => showLogMoodSheet(context,
+            preselected: mood.selectedEntry?.mood),
         icon: const Icon(Icons.add_reaction_outlined),
-        label: Text(
-          mood.selectedEntry == null ? 'Log Your Mood' : 'Update Mood',
-          style: const TextStyle(
+        label: const Text(
+          'Log Your Mood',
+          style: TextStyle(
               fontSize: 16, fontWeight: FontWeight.bold),
         ),
         style: FilledButton.styleFrom(

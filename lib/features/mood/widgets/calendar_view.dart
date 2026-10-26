@@ -88,7 +88,9 @@ class _CalendarViewState extends State<CalendarView> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
-                                    '$totalCheckIns logged',
+                                    totalCheckIns == 1
+                                        ? '1 check-in'
+                                        : '$totalCheckIns check-ins',
                                     style:
                                         theme.textTheme.labelSmall?.copyWith(
                                       color: theme

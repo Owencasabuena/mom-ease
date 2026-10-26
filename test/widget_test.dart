@@ -17,6 +17,8 @@ import 'package:mom_ease/features/mood/models/mood_type.dart';
 import 'package:mom_ease/features/mood/repositories/mood_repository.dart';
 import 'package:mom_ease/features/mood/services/mood_service.dart';
 import 'package:mom_ease/features/mood/state/mood_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:mom_ease/features/mood/screens/mood_tracker_screen.dart';
 import 'package:mom_ease/features/mood/widgets/calendar_view.dart';
 import 'package:mom_ease/features/mood/widgets/log_mood_bottom_sheet.dart';
 import 'package:mom_ease/features/mood/widgets/mood_statistics.dart';
@@ -322,6 +324,28 @@ void main() {
       final today = DateTime.now();
       expect(find.text('${today.day}'), findsWidgets);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('MoodTrackerScreen renders simplified date and consistent check-ins terminology',
+        (WidgetTester tester) async {
+      final now = DateTime.now();
+      await moodProvider.saveMoodForSelectedDate(MoodType.happy);
+
+      await tester.pumpWidget(createTestWidget(const MoodTrackerScreen()));
+      await tester.pumpAndSettle();
+
+      // Simplified top date format: e.g. Monday, October 26 (no duplicate year)
+      final expectedDate = DateFormat('EEEE, MMMM d').format(now);
+      expect(find.text(expectedDate), findsOneWidget);
+
+      // Month header uses "check-ins" instead of "logged"
+      expect(find.textContaining('logged'), findsNothing);
+      expect(find.text('1 check-in'), findsOneWidget);
+
+      // Hero mood card displays Update Mood and Add Journal Entry
+      expect(find.text('Happy'), findsWidgets);
+      expect(find.text('Update Mood'), findsOneWidget);
+      expect(find.text('Add Journal Entry'), findsOneWidget);
     });
   });
 }
