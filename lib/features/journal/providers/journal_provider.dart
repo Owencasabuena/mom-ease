@@ -34,6 +34,7 @@ class JournalProvider extends ChangeNotifier {
 
   // ── Getters ──────────────────────────────────────────────────────────────
 
+  String get userId => _journalService.userId;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<JournalEntry> get allEntries => _entries;
@@ -142,14 +143,21 @@ class JournalProvider extends ChangeNotifier {
 
   Future<bool> saveEntry(JournalEntry entry) async {
     try {
+      final targetUserId = _journalService.userId;
+      final resolvedEntry =
+          (entry.userId.isEmpty || entry.userId == 'local_user')
+              ? entry.copyWith(userId: targetUserId)
+              : entry;
+
       // Check if entry already exists (update vs create)
-      final existingIndex = _entries.indexWhere((e) => e.id == entry.id);
+      final existingIndex =
+          _entries.indexWhere((e) => e.id == resolvedEntry.id);
       if (existingIndex >= 0) {
-        await _journalService.updateEntry(entry);
-        _entries[existingIndex] = entry;
+        await _journalService.updateEntry(resolvedEntry);
+        _entries[existingIndex] = resolvedEntry;
       } else {
-        await _journalService.createEntry(entry);
-        _entries.insert(0, entry);
+        await _journalService.createEntry(resolvedEntry);
+        _entries.insert(0, resolvedEntry);
       }
       // Clear draft upon successful save
       await _journalService.clearDraft();

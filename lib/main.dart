@@ -109,10 +109,10 @@ void main() async {
             ),
           ),
           update: (_, auth, previous) {
-            if (previous != null) {
+            final userId = auth.currentUser?.id ?? 'local_user';
+            if (previous != null && previous.userId == userId) {
               return previous;
             }
-            final userId = auth.currentUser?.id ?? 'local_user';
             return JournalProvider(
               JournalService(
                 LocalJournalRepository(),

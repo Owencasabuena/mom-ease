@@ -242,7 +242,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     final entry = JournalEntry(
       id: widget.existingEntry?.id ??
           'entry_${now.millisecondsSinceEpoch}',
-      userId: widget.existingEntry?.userId ?? 'local_user',
+      userId: widget.existingEntry?.userId ?? provider.userId,
       date: _selectedDate,
       title: title.isEmpty ? null : title,
       content: content,
@@ -284,7 +284,6 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     _draftDebounce?.cancel();
     _titleController.dispose();
     _contentController.dispose();
-    _speechService.cancelListening();
     _speechService.dispose();
     super.dispose();
   }

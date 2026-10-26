@@ -59,6 +59,11 @@ class _JournalScreenState extends State<JournalScreen> {
         ),
       ),
     );
+    if (mounted) {
+      final journalProvider =
+          Provider.of<JournalProvider?>(context, listen: false);
+      await journalProvider?.reloadEntries();
+    }
   }
 
   void _showCalendarSheet(BuildContext context, JournalProvider provider) {
@@ -549,12 +554,15 @@ class _JournalScreenState extends State<JournalScreen> {
                         final entry = entries[index];
                         return JournalEntryCard(
                           entry: entry,
-                          onTap: () {
-                            Navigator.of(context).push(
+                          onTap: () async {
+                            await Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => JournalDetailScreen(entry: entry),
                               ),
                             );
+                            if (mounted) {
+                              provider.reloadEntries();
+                            }
                           },
                           onFavoriteToggle: () {
                             provider.toggleFavorite(entry.id);

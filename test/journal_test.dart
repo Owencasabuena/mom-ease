@@ -39,9 +39,26 @@ class _FakeJournalRepository implements JournalRepository {
     return _entries[id];
   }
 
+  bool _matchesUser(String entryUserId, String queryUserId) {
+    if (entryUserId == queryUserId) return true;
+    final isEntryLocal =
+        entryUserId == 'local_user' || entryUserId.startsWith('local_');
+    final isQueryLocal =
+        queryUserId == 'local_user' || queryUserId.startsWith('local_');
+    return isEntryLocal && isQueryLocal;
+  }
+
   @override
   Future<List<JournalEntry>> getEntries(String userId) async {
-    final list = _entries.values.where((e) => e.userId == userId).toList();
+    final list = <JournalEntry>[];
+    for (final e in _entries.values) {
+      if (_matchesUser(e.userId, userId)) {
+        if (e.userId != userId && userId != 'local_user') {
+          e.userId = userId;
+        }
+        list.add(e);
+      }
+    }
     list.sort((a, b) => b.date.compareTo(a.date));
     return list;
   }
@@ -49,7 +66,7 @@ class _FakeJournalRepository implements JournalRepository {
   @override
   Future<List<JournalEntry>> getEntriesForDate(String userId, DateTime date) async {
     return _entries.values.where((e) {
-      return e.userId == userId &&
+      return _matchesUser(e.userId, userId) &&
           e.date.year == date.year &&
           e.date.month == date.month &&
           e.date.day == date.day;
@@ -59,20 +76,20 @@ class _FakeJournalRepository implements JournalRepository {
   @override
   Future<List<JournalEntry>> getEntriesForMonth(String userId, int year, int month) async {
     return _entries.values.where((e) {
-      return e.userId == userId && e.date.year == year && e.date.month == month;
+      return _matchesUser(e.userId, userId) && e.date.year == year && e.date.month == month;
     }).toList();
   }
 
   @override
   Future<List<JournalEntry>> getFavoriteEntries(String userId) async {
-    return _entries.values.where((e) => e.userId == userId && e.isFavorite).toList();
+    return _entries.values.where((e) => _matchesUser(e.userId, userId) && e.isFavorite).toList();
   }
 
   @override
   Future<List<JournalEntry>> searchEntries(String userId, String query) async {
     final q = query.toLowerCase();
     return _entries.values.where((e) {
-      return e.userId == userId &&
+      return _matchesUser(e.userId, userId) &&
           ((e.title?.toLowerCase().contains(q) ?? false) ||
               e.content.toLowerCase().contains(q) ||
               e.tags.any((t) => t.toLowerCase().contains(q)));
@@ -555,6 +572,36 @@ void main() {
       expect(find.text('Recent Entries'), findsOneWidget);
       // Empty state contains the single primary New Entry button
       expect(find.text('New Entry'), findsOneWidget);
+    });
+
+    test('Journal entry persists and does not disappear on reload when saved with local_user or specific user ID', () async {
+      final repo = _FakeJournalRepository();
+      final service = JournalService(repo, 'local_1740000000');
+      final provider = JournalProvider(service);
+      await provider.init();
+
+      // Simulate an entry created with default/legacy 'local_user'
+      final entry = JournalEntry(
+        id: 'entry_test_persist_1',
+        userId: 'local_user',
+        date: DateTime.now(),
+        content: 'I had a quiet evening with baby.',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final saved = await provider.saveEntry(entry);
+      expect(saved, isTrue);
+      expect(provider.allEntries.length, 1);
+      expect(provider.allEntries.first.content, 'I had a quiet evening with baby.');
+
+      // Simulate a reload or refresh
+      await provider.reloadEntries();
+
+      // Must NOT disappear
+      expect(provider.allEntries.length, 1);
+      expect(provider.allEntries.first.content, 'I had a quiet evening with baby.');
+      expect(provider.allEntries.first.userId, 'local_1740000000');
     });
   });
 }

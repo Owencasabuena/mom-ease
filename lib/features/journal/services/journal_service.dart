@@ -82,6 +82,8 @@ class JournalService {
     this._storageService,
   ]);
 
+  String get userId => _userId;
+
   String get _draftKey => '$_draftPrefix$_userId';
   String get _customTagsKey => '$_customTagsPrefix$_userId';
   String get _lockKey => '$_lockPrefix$_userId';

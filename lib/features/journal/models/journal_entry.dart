@@ -82,11 +82,14 @@ class JournalEntry extends HiveObject {
   }
 
   JournalEntry copyWith({
+    String? id,
+    String? userId,
     String? title,
     String? content,
     String? moodId,
     bool clearMood = false,
     List<String>? tags,
+    DateTime? createdAt,
     DateTime? updatedAt,
     bool? isFavorite,
     String? promptId,
@@ -94,14 +97,14 @@ class JournalEntry extends HiveObject {
     DateTime? date,
   }) {
     return JournalEntry(
-      id: id,
-      userId: userId,
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
       date: date ?? this.date,
       title: title ?? this.title,
       content: content ?? this.content,
       moodId: clearMood ? null : (moodId ?? this.moodId),
       tags: tags ?? List<String>.from(this.tags),
-      createdAt: createdAt,
+      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       isFavorite: isFavorite ?? this.isFavorite,
       promptId: promptId ?? this.promptId,

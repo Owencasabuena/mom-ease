@@ -7,6 +7,17 @@ class LocalJournalRepository implements JournalRepository {
   static const String boxName = 'journalBox';
 
   Box<JournalEntry> get _box => Hive.box<JournalEntry>(boxName);
+ 
+  /// Checks whether an entry belongs to the querying user.
+  /// Handles fallback and migration between generic 'local_user' and specific local user IDs.
+  bool _matchesUser(String entryUserId, String queryUserId) {
+    if (entryUserId == queryUserId) return true;
+    final isEntryLocal =
+        entryUserId == 'local_user' || entryUserId.startsWith('local_');
+    final isQueryLocal =
+        queryUserId == 'local_user' || queryUserId.startsWith('local_');
+    return isEntryLocal && isQueryLocal;
+  }
 
   @override
   Future<void> createEntry(JournalEntry entry) async {
@@ -30,8 +41,18 @@ class LocalJournalRepository implements JournalRepository {
 
   @override
   Future<List<JournalEntry>> getEntries(String userId) async {
-    final list = _box.values.where((e) => e.userId == userId).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final list = <JournalEntry>[];
+    for (final e in _box.values) {
+      if (_matchesUser(e.userId, userId)) {
+        if (e.userId != userId && userId != 'local_user') {
+          // Auto-heal legacy or default 'local_user' entries to active local userId
+          e.userId = userId;
+          await e.save();
+        }
+        list.add(e);
+      }
+    }
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
   }
 
@@ -39,7 +60,7 @@ class LocalJournalRepository implements JournalRepository {
   Future<List<JournalEntry>> getEntriesForDate(
       String userId, DateTime date) async {
     final list = _box.values.where((e) {
-      return e.userId == userId &&
+      return _matchesUser(e.userId, userId) &&
           e.date.year == date.year &&
           e.date.month == date.month &&
           e.date.day == date.day;
@@ -52,7 +73,7 @@ class LocalJournalRepository implements JournalRepository {
   Future<List<JournalEntry>> getEntriesForMonth(
       String userId, int year, int month) async {
     final list = _box.values.where((e) {
-      return e.userId == userId &&
+      return _matchesUser(e.userId, userId) &&
           e.date.year == year &&
           e.date.month == month;
     }).toList()
@@ -66,7 +87,7 @@ class LocalJournalRepository implements JournalRepository {
     if (trimmed.isEmpty) return getEntries(userId);
 
     final list = _box.values.where((e) {
-      if (e.userId != userId) return false;
+      if (!_matchesUser(e.userId, userId)) return false;
       final matchTitle = e.title?.toLowerCase().contains(trimmed) ?? false;
       final matchContent = e.content.toLowerCase().contains(trimmed);
       final matchTags = e.tags.any((t) => t.toLowerCase().contains(trimmed));
@@ -80,7 +101,7 @@ class LocalJournalRepository implements JournalRepository {
   @override
   Future<List<JournalEntry>> getFavoriteEntries(String userId) async {
     final list = _box.values
-        .where((e) => e.userId == userId && e.isFavorite)
+        .where((e) => _matchesUser(e.userId, userId) && e.isFavorite)
         .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
