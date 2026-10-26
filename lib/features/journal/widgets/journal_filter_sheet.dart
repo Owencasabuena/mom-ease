@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../mood/models/mood_type.dart';
 import '../providers/journal_provider.dart';
 
-/// Modal bottom sheet allowing mothers to filter their journal timeline.
+/// Modal bottom sheet allowing mothers to filter their journal timeline by type
+/// (Favorites, Mood, and Tags). Date browsing is handled separately via the Calendar.
 class JournalFilterSheet extends StatelessWidget {
   final JournalProvider provider;
 
@@ -28,150 +28,192 @@ class JournalFilterSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return ListenableBuilder(
+      listenable: provider,
+      builder: (context, _) {
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header
                 Text(
-                  'Filter Journal Entries',
+                  'Filter Journal',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Spacer(),
-                if (provider.hasActiveFilters)
-                  TextButton(
-                    onPressed: () {
-                      provider.clearFilters();
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Reset All'),
+                const SizedBox(height: 12),
+
+                // Favorites filter switch
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text(
+                    'Favorites Only',
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Favorites filter switch
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Favorites Only'),
-              secondary: const Icon(Icons.star_rounded, color: Colors.amber),
-              value: provider.onlyFavorites,
-              onChanged: (val) => provider.setFilterFavorites(val),
-            ),
-            const Divider(),
-
-            // Mood Filter
-            Text(
-              'By Mood',
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ChoiceChip(
-                    label: const Text('All Moods'),
-                    selected: provider.filterMoodId == null,
-                    onSelected: (sel) {
-                      if (sel) provider.setFilterMood(null);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  ...MoodType.values.map((mood) {
-                    final isSel = provider.filterMoodId == mood.name;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        avatar: Image.asset(
-                          mood.assetPath,
-                          width: 18,
-                          height: 18,
-                          errorBuilder: (context, error, stackTrace) => Icon(
-                            Icons.sentiment_neutral,
-                            size: 16,
-                            color: mood.color,
-                          ),
-                        ),
-                        label: Text(mood.label),
-                        selected: isSel,
-                        onSelected: (sel) {
-                          provider.setFilterMood(sel ? mood.name : null);
-                        },
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Date Filter
-            Text(
-              'By Date',
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: provider.filterDate ?? DateTime.now(),
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null) {
-                        provider.setFilterDate(picked);
-                      }
-                    },
-                    icon: const Icon(Icons.calendar_today_rounded, size: 18),
-                    label: Text(
-                      provider.filterDate != null
-                          ? DateFormat('MMMM d, yyyy')
-                              .format(provider.filterDate!)
-                          : 'Select a date',
+                  subtitle: Text(
+                    'Show only starred journal entries',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                ),
-                if (provider.filterDate != null) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    tooltip: 'Clear date filter',
-                    onPressed: () => provider.setFilterDate(null),
+                  secondary: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.star_rounded,
+                        color: Colors.amber, size: 22),
                   ),
-                ],
+                  value: provider.onlyFavorites,
+                  onChanged: (val) => provider.setFilterFavorites(val),
+                ),
+                const Divider(height: 24),
+
+                // Mood Filter Section
+                Text(
+                  'By Mood',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      ChoiceChip(
+                        showCheckmark: false,
+                        label: const Text('All Moods'),
+                        selected: provider.filterMoodId == null,
+                        onSelected: (sel) {
+                          if (sel) provider.setFilterMood(null);
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      ...MoodType.values.map((mood) {
+                        final isSel = provider.filterMoodId == mood.name;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            showCheckmark: false,
+                            tooltip: mood.label,
+                            label: Image.asset(
+                              mood.assetPath,
+                              width: 24,
+                              height: 24,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Text(
+                                mood.emoji,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
+                            selected: isSel,
+                            onSelected: (sel) {
+                              provider.setFilterMood(sel ? mood.name : null);
+                            },
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+                const Divider(height: 28),
+
+                // Tags Filter Section
+                Text(
+                  'By Tags',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                if (provider.availableTags.isEmpty)
+                  Text(
+                    'No tags available yet.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('All Tags'),
+                        selected: provider.filterTag == null,
+                        onSelected: (sel) {
+                          if (sel) provider.setFilterTag(null);
+                        },
+                      ),
+                      ...provider.availableTags.map((tag) {
+                        final isSel = provider.filterTag?.toLowerCase() ==
+                            tag.toLowerCase();
+                        return FilterChip(
+                          label: Text('#$tag'),
+                          selected: isSel,
+                          onSelected: (sel) {
+                            provider.setFilterTag(sel ? tag : null);
+                          },
+                          labelStyle: TextStyle(
+                            fontWeight:
+                                isSel ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                const SizedBox(height: 28),
+
+                // Bottom Actions: Reset (secondary) + Apply Filters (primary)
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          provider.clearTypeFilters();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 48),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text('Reset'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 3,
+                      child: FilledButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 48),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'Apply Filters',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // Apply button
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: const Text('Apply Filters'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

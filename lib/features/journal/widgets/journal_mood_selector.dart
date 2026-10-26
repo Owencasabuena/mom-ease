@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../mood/models/mood_type.dart';
 
 /// Horizontal mood selector allowing mothers to optionally tag a journal entry with a mood.
+/// Shows compact emoji-only icons without checkmarks or text clutter.
 class JournalMoodSelector extends StatelessWidget {
   final MoodType? selectedMood;
   final ValueChanged<MoodType?> onMoodSelected;
@@ -17,116 +18,97 @@ class JournalMoodSelector extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 76,
+      height: 52,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         children: [
-          // "No Mood" chip
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: InkWell(
-              onTap: () => onMoodSelected(null),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: 64,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: selectedMood == null
-                      ? theme.colorScheme.primaryContainer
-                      : theme.colorScheme.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: selectedMood == null
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outlineVariant
-                            .withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.block_rounded,
-                      size: 22,
-                      color: selectedMood == null
-                          ? theme.colorScheme.onPrimaryContainer
-                          : theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'None',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontSize: 10,
-                        fontWeight: selectedMood == null
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          // "None" option
+          _buildOption(
+            context: context,
+            isSelected: selectedMood == null,
+            label: 'None',
+            iconWidget: Icon(
+              Icons.block_rounded,
+              size: 22,
+              color: selectedMood == null
+                  ? theme.colorScheme.onPrimaryContainer
+                  : theme.colorScheme.onSurfaceVariant,
             ),
+            accentColor: theme.colorScheme.primary,
+            onTap: () => onMoodSelected(null),
           ),
-          // 5 Mood types
+          const SizedBox(width: 8),
+
+          // 5 Mood options
           ...MoodType.values.map((mood) {
             final isSelected = selectedMood == mood;
 
             return Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: InkWell(
-                onTap: () => onMoodSelected(mood),
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: 64,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? mood.color.withValues(alpha: 0.18)
-                        : theme.colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected
-                          ? mood.color
-                          : theme.colorScheme.outlineVariant
-                              .withValues(alpha: 0.4),
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        mood.assetPath,
-                        width: 24,
-                        height: 24,
-                        errorBuilder: (context, error, stackTrace) => Icon(
-                          Icons.sentiment_satisfied_rounded,
-                          size: 24,
-                          color: mood.color,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        mood.label,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontSize: 10,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected
-                              ? mood.color
-                              : theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+              child: _buildOption(
+                context: context,
+                isSelected: isSelected,
+                label: mood.label,
+                iconWidget: Image.asset(
+                  mood.assetPath,
+                  width: 28,
+                  height: 28,
+                  errorBuilder: (context, error, stackTrace) => Text(
+                    mood.emoji,
+                    style: const TextStyle(fontSize: 22),
                   ),
                 ),
+                accentColor: mood.color,
+                onTap: () => onMoodSelected(isSelected ? null : mood),
               ),
             );
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOption({
+    required BuildContext context,
+    required bool isSelected,
+    required String label,
+    required Widget iconWidget,
+    required Color accentColor,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: 'Mood $label',
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? accentColor.withValues(alpha: 0.2)
+                  : theme.colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected
+                    ? accentColor
+                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Center(
+              child: iconWidget,
+            ),
+          ),
+        ),
       ),
     );
   }

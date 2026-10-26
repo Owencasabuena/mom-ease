@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:mom_ease/features/journal/data/journal_repository.dart';
 import 'package:mom_ease/features/journal/models/journal_entry.dart';
 import 'package:mom_ease/features/journal/models/journal_prompt.dart';
@@ -8,9 +9,13 @@ import 'package:mom_ease/features/journal/screens/journal_screen.dart';
 import 'package:mom_ease/features/journal/services/journal_prompt_service.dart';
 import 'package:mom_ease/features/journal/services/journal_service.dart';
 import 'package:mom_ease/features/journal/services/speech_service.dart';
+import 'package:mom_ease/features/journal/widgets/journal_calendar_sheet.dart';
 import 'package:mom_ease/features/journal/widgets/journal_empty_state.dart';
 import 'package:mom_ease/features/journal/widgets/journal_entry_card.dart';
+import 'package:mom_ease/features/journal/widgets/journal_filter_sheet.dart';
+import 'package:mom_ease/features/journal/widgets/journal_mood_selector.dart';
 import 'package:mom_ease/features/journal/widgets/prompt_card.dart';
+import 'package:mom_ease/features/journal/widgets/voice_input_button.dart';
 import 'package:mom_ease/features/mood/models/mood_type.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -482,11 +487,11 @@ void main() {
         ),
       );
 
-      expect(find.text('Daily Prompt'), findsOneWidget);
+      expect(find.text('Daily Reflection'), findsOneWidget);
       expect(find.text(prompt.textEn), findsOneWidget);
-      expect(find.text('Answer Prompt'), findsOneWidget);
+      expect(find.text('Answer'), findsOneWidget);
 
-      await tester.tap(find.text('Answer Prompt'));
+      await tester.tap(find.text('Answer'));
       expect(answered, isTrue);
 
       await tester.tap(find.byIcon(Icons.refresh_rounded));
@@ -507,7 +512,7 @@ void main() {
 
       expect(find.text('Your journal is ready when you are.'), findsOneWidget);
       expect(
-        find.text('A private space for your thoughts, feelings, and moments. You can type or use your voice.'),
+        find.text('Write a few words or speak your thoughts.'),
         findsOneWidget,
       );
       expect(find.text('New Entry'), findsOneWidget);
@@ -602,6 +607,214 @@ void main() {
       expect(provider.allEntries.length, 1);
       expect(provider.allEntries.first.content, 'I had a quiet evening with baby.');
       expect(provider.allEntries.first.userId, 'local_1740000000');
+    });
+
+    testWidgets('PromptCard progressive disclosure renders compact completed state', (tester) async {
+      bool viewTapped = false;
+      final prompt = kDefaultJournalPrompts.first;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PromptCard(
+              prompt: prompt,
+              language: 'en',
+              isCompleted: true,
+              onUsePrompt: () {},
+              onNextPrompt: () {},
+              onViewEntry: () => viewTapped = true,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Daily Reflection • Completed today'), findsOneWidget);
+      expect(find.text('View'), findsOneWidget);
+
+      await tester.tap(find.text('View'));
+      expect(viewTapped, isTrue);
+    });
+
+    testWidgets('JournalMoodSelector renders emoji-only options cleanly without checkmarks or text clutter', (tester) async {
+      MoodType? selected;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return JournalMoodSelector(
+                  selectedMood: selected,
+                  onMoodSelected: (m) => setState(() => selected = m),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Verify no checkmarks are present
+      expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+
+      // Verify text labels are removed (only emoji/icon displayed)
+      expect(find.text('None'), findsNothing);
+      expect(find.text('Very Happy'), findsNothing);
+      expect(find.text('Happy'), findsNothing);
+      expect(find.text('Okay'), findsNothing);
+      expect(find.text('Sad'), findsNothing);
+      expect(find.text('Very Sad'), findsNothing);
+
+      // Verify selection by tapping tooltip
+      await tester.tap(find.byTooltip('Very Happy'));
+      await tester.pumpAndSettle();
+      expect(selected, MoodType.veryHappy);
+
+      // Still no checkmark even when selected
+      expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+
+      // Tapping the selected mood again deselects it
+      await tester.tap(find.byTooltip('Very Happy'));
+      await tester.pumpAndSettle();
+      expect(selected, isNull);
+    });
+
+    testWidgets('JournalFilterSheet provides Favorites, Mood, Tags, Reset, Apply without Date selector', (tester) async {
+      final repo = _FakeJournalRepository();
+      final service = JournalService(repo, 'user_filters');
+      final provider = JournalProvider(service);
+      await provider.init();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: JournalFilterSheet(provider: provider),
+          ),
+        ),
+      );
+
+      // Verify Favorites switch is present
+      expect(find.text('Favorites Only'), findsOneWidget);
+
+      // Verify Mood chips are present
+      expect(find.text('All Moods'), findsOneWidget);
+      expect(find.text('By Mood'), findsOneWidget);
+
+      // Verify Tags section is present
+      expect(find.text('By Tags'), findsOneWidget);
+
+      // Verify Date selector was removed from filter sheet per requirements
+      expect(find.text('By Date'), findsNothing);
+      expect(find.text('Select a date'), findsNothing);
+
+      // Verify single Reset button and Apply Filters button (no redundant top Reset)
+      expect(find.text('Reset'), findsOneWidget);
+      expect(find.text('Apply Filters'), findsOneWidget);
+
+      // Verify mood chips are emoji-only without text labels
+      expect(find.text('Very Happy'), findsNothing);
+      expect(find.text('Happy'), findsNothing);
+
+      // Verify choice chips under By Mood have showCheckmark: false
+      final moodChips = tester.widgetList<ChoiceChip>(find.byType(ChoiceChip)).take(6);
+      expect(moodChips.length, 6);
+      for (final chip in moodChips) {
+        expect(chip.showCheckmark, isFalse);
+      }
+    });
+
+    testWidgets('JournalCalendarSheet renders current month, dots on entry dates, and selects date', (tester) async {
+      final repo = _FakeJournalRepository();
+      final now = DateTime.now();
+      await repo.createEntry(JournalEntry(
+        id: 'cal_entry_1',
+        userId: 'cal_user',
+        date: now,
+        content: 'Entry for today',
+        moodId: 'happy',
+        createdAt: now,
+        updatedAt: now,
+      ));
+
+      final service = JournalService(repo, 'cal_user');
+      final provider = JournalProvider(service);
+      await provider.init();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: JournalCalendarSheet(provider: provider),
+          ),
+        ),
+      );
+
+      // Verify month / year header
+      final monthName = DateFormat('MMMM yyyy').format(now);
+      expect(find.text(monthName), findsOneWidget);
+
+      // Verify today is displayed in the calendar
+      expect(find.text('${now.day}'), findsWidgets);
+
+      // Tap on today to select
+      await tester.tap(find.text('${now.day}').first);
+      expect(provider.filterDate?.day, now.day);
+    });
+
+    testWidgets('JournalScreen renders active filter chips and dynamic header titles', (tester) async {
+      final repo = _FakeJournalRepository();
+      final service = JournalService(repo, 'chips_user');
+      final provider = JournalProvider(service);
+      await provider.init();
+
+      // Set a date filter
+      final today = DateTime.now();
+      provider.setFilterDate(today);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<JournalProvider>.value(
+          value: provider,
+          child: const MaterialApp(
+            home: JournalScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify dynamic header reflects date
+      final dateLabel = 'Entries for ${DateFormat('MMMM d').format(today)}';
+      expect(find.text(dateLabel), findsOneWidget);
+
+      // Verify active date chip is rendered
+      final chipLabel = DateFormat('MMM d').format(today);
+      expect(find.text(chipLabel), findsOneWidget);
+
+      // Tap X to delete active date chip
+      await tester.tap(find.byIcon(Icons.close_rounded).first);
+      await tester.pumpAndSettle();
+      expect(provider.filterDate, isNull);
+    });
+
+    testWidgets('VoiceInputButton shows mic when idle and square stop icon when listening', (tester) async {
+      final speechService = SpeechService();
+      bool pressed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: VoiceInputButton(
+              speechService: speechService,
+              onPressed: () => pressed = true,
+            ),
+          ),
+        ),
+      );
+
+      // Idle shows mic
+      expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.stop_rounded), findsNothing);
+      expect(find.textContaining('🎙'), findsNothing);
+
+      await tester.tap(find.byType(VoiceInputButton));
+      expect(pressed, isTrue);
     });
   });
 }

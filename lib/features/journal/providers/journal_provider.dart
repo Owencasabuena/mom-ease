@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../mood/models/mood_type.dart';
 import '../models/journal_entry.dart';
 import '../models/journal_prompt.dart';
 import '../services/journal_prompt_service.dart';
@@ -52,12 +53,50 @@ class JournalProvider extends ChangeNotifier {
   bool get isUnlocked => _isUnlocked;
   bool get isLocked => _isLockEnabled && !_isUnlocked;
 
+  /// Count of active type filters (Favorites, Mood, Tag).
+  int get activeTypeFilterCount {
+    int count = 0;
+    if (_onlyFavorites) count++;
+    if (_filterMoodId != null) count++;
+    if (_filterTag != null) count++;
+    return count;
+  }
+
+  bool get hasActiveTypeFilters => activeTypeFilterCount > 0;
+
   bool get hasActiveFilters =>
-      _onlyFavorites ||
-      _filterMoodId != null ||
-      _filterTag != null ||
+      hasActiveTypeFilters ||
       _filterDate != null ||
       _searchQuery.isNotEmpty;
+
+  /// Returns whether a prompt has been answered in this journal.
+  bool hasAnsweredPrompt(String? promptId) {
+    if (promptId == null) return false;
+    return _entries.any((e) => e.promptId == promptId);
+  }
+
+  /// Returns the entry that answered a prompt, if one exists.
+  JournalEntry? getEntryForPrompt(String? promptId) {
+    if (promptId == null) return null;
+    try {
+      return _entries.firstWhere((e) => e.promptId == promptId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Map of dates that contain journal entries, mapped to the linked mood (if any).
+  Map<DateTime, MoodType?> get entryDatesWithMood {
+    final map = <DateTime, MoodType?>{};
+    for (final e in _entries) {
+      final normalized = DateTime(e.date.year, e.date.month, e.date.day);
+      if (!map.containsKey(normalized) ||
+          (map[normalized] == null && e.mood != null)) {
+        map[normalized] = e.mood;
+      }
+    }
+    return map;
+  }
 
   /// Filtered and searched journal entries.
   List<JournalEntry> get filteredEntries {
@@ -241,6 +280,13 @@ class JournalProvider extends ChangeNotifier {
 
   void setFilterDate(DateTime? date) {
     _filterDate = date;
+    notifyListeners();
+  }
+
+  void clearTypeFilters() {
+    _onlyFavorites = false;
+    _filterMoodId = null;
+    _filterTag = null;
     notifyListeners();
   }
 

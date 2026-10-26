@@ -30,7 +30,7 @@ class VoiceInputButton extends StatelessWidget {
       case SpeechStatus.listening:
         buttonColor = theme.colorScheme.error;
         iconColor = Colors.white;
-        icon = Icons.mic_rounded;
+        icon = Icons.stop_rounded;
         break;
       case SpeechStatus.processing:
         buttonColor = theme.colorScheme.tertiary;
