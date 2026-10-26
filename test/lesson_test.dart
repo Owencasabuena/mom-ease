@@ -8,6 +8,7 @@ import 'package:mom_ease/features/lessons/providers/lesson_provider.dart';
 import 'package:mom_ease/features/lessons/screens/lesson_detail_screen.dart';
 import 'package:mom_ease/features/lessons/services/lesson_recommendation_service.dart';
 import 'package:mom_ease/features/lessons/services/lesson_service.dart';
+import 'package:mom_ease/features/lessons/widgets/key_takeaways_card.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -240,6 +241,36 @@ void main() {
 
         expect(foundBoldNumber1, isTrue);
         expect(foundBoldNumber2, isTrue);
+      },
+    );
+
+    testWidgets(
+      'KeyTakeawaysCard renders Tagalog title without horizontal overflow',
+      (tester) async {
+        tester.view.physicalSize = const Size(320 * 2.0, 600 * 2.0);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: KeyTakeawaysCard(
+                  language: 'tl',
+                  takeaways: [
+                    'Magpahinga kapag natutulog ang baby mo, kahit saglit lang.',
+                    'Maghanda ng simpleng meryenda upang mapanatili ang lakas.',
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Mga Dapat Tandaan'), findsOneWidget);
+        expect(tester.takeException(), isNull);
       },
     );
   });

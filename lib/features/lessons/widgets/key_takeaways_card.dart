@@ -16,9 +16,7 @@ class KeyTakeawaysCard extends StatelessWidget {
     if (takeaways.isEmpty) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
-    final title = language == 'tl'
-        ? 'Mga Mahalagang Dapat Tandaan'
-        : 'Key Takeaways';
+    final title = language == 'tl' ? 'Mga Dapat Tandaan' : 'Key Takeaways';
 
     return Container(
       decoration: BoxDecoration(
@@ -40,11 +38,13 @@ class KeyTakeawaysCard extends StatelessWidget {
                 size: 22,
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSecondaryContainer,
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ),
             ],
