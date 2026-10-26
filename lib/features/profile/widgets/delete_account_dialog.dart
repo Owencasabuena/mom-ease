@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../auth/screens/auth_screen.dart';
 import '../../auth/services/auth_provider.dart';
 
@@ -56,12 +57,12 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
           ),
           onPressed: _isDeleting ? null : _handleDelete,
           child: _isDeleting
-              ? const SizedBox(
+              ? SizedBox(
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: theme.colorScheme.onError,
                   ),
                 )
               : const Text('Delete'),

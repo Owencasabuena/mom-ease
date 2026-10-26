@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../../features/auth/services/auth_provider.dart';
 import '../../../features/profile/screens/profile_screen.dart';
 import '../../journal/screens/journal_editor_screen.dart';
@@ -46,17 +47,17 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
       appBar: AppBar(
         title: Text(
           '$greeting, $name',
-          style: theme.textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
             tooltip: 'Profile & Settings',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ProfileScreen()),
-            ),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
           ),
         ],
         elevation: 0,
@@ -89,7 +90,8 @@ class _DateHeader extends StatelessWidget {
     final mood = context.watch<MoodProvider>();
     final theme = Theme.of(context);
     final today = DateTime.now();
-    final isToday = mood.selectedDate.year == today.year &&
+    final isToday =
+        mood.selectedDate.year == today.year &&
         mood.selectedDate.month == today.month &&
         mood.selectedDate.day == today.day;
 
@@ -132,7 +134,8 @@ class _SelectedDayCard extends StatelessWidget {
     final theme = Theme.of(context);
     final entry = mood.selectedEntry;
     final today = DateTime.now();
-    final isToday = mood.selectedDate.year == today.year &&
+    final isToday =
+        mood.selectedDate.year == today.year &&
         mood.selectedDate.month == today.month &&
         mood.selectedDate.day == today.day;
 
@@ -181,7 +184,9 @@ class _SelectedDayCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                isToday ? 'How are you feeling today?' : 'How were you feeling?',
+                isToday
+                    ? 'How are you feeling today?'
+                    : 'How were you feeling?',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -230,8 +235,11 @@ class _SelectedDayCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: entryMood.color.withValues(alpha: 0.3),
                       ),
-                      child: Icon(Icons.sentiment_neutral,
-                          color: entryMood.color, size: 32),
+                      child: Icon(
+                        Icons.sentiment_neutral,
+                        color: entryMood.color,
+                        size: 32,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -283,8 +291,8 @@ class _SelectedDayCard extends StatelessWidget {
                   runSpacing: 6,
                   children: [
                     OutlinedButton.icon(
-                      onPressed: () => showLogMoodSheet(context,
-                          preselected: entryMood),
+                      onPressed: () =>
+                          showLogMoodSheet(context, preselected: entryMood),
                       icon: const Icon(Icons.edit_outlined, size: 16),
                       label: const Text('Update Mood'),
                       style: OutlinedButton.styleFrom(
@@ -345,18 +353,18 @@ class _LogButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: FilledButton.icon(
-        onPressed: () => showLogMoodSheet(context,
-            preselected: mood.selectedEntry?.mood),
+        onPressed: () =>
+            showLogMoodSheet(context, preselected: mood.selectedEntry?.mood),
         icon: const Icon(Icons.add_reaction_outlined),
         label: const Text(
           'Log Your Mood',
-          style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(54),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );
@@ -377,13 +385,17 @@ class _SupportBanner extends StatelessWidget {
           color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-              color: theme.colorScheme.tertiary.withValues(alpha: 0.3)),
+            color: theme.colorScheme.tertiary.withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.favorite_border_rounded,
-                color: theme.colorScheme.tertiary, size: 22),
+            Icon(
+              Icons.favorite_border_rounded,
+              color: theme.colorScheme.tertiary,
+              size: 22,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

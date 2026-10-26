@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../auth/screens/auth_screen.dart';
 import '../../auth/services/auth_provider.dart';
 import '../../journal/providers/journal_provider.dart';
@@ -29,14 +30,14 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => const DeleteAccountDialog(),
-    );
+    showDialog(context: context, builder: (_) => const DeleteAccountDialog());
   }
 
   void _toggleJournalLock(BuildContext context, bool enable) async {
-    final journalProvider = Provider.of<JournalProvider?>(context, listen: false);
+    final journalProvider = Provider.of<JournalProvider?>(
+      context,
+      listen: false,
+    );
     if (journalProvider == null) return;
 
     if (enable) {
@@ -135,7 +136,9 @@ class ProfileScreen extends StatelessWidget {
             ),
             FilledButton(
               onPressed: () async {
-                final valid = await journalProvider.verifyAndUnlock(pinController.text.trim());
+                final valid = await journalProvider.verifyAndUnlock(
+                  pinController.text.trim(),
+                );
                 if (ctx.mounted) {
                   Navigator.of(ctx).pop(valid);
                 }
@@ -193,7 +196,7 @@ class ProfileScreen extends StatelessWidget {
           content: Text(
             auth.errorMessage ??
                 'Google Sign-In requires Firebase configuration.\n'
-                'In future versions, linking your Google account will back up your local profile securely to the cloud.',
+                    'In future versions, linking your Google account will back up your local profile securely to the cloud.',
             style: Theme.of(ctx).textTheme.bodyMedium,
           ),
           actions: [
@@ -278,12 +281,14 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 8.0,
+                  ),
                   child: Text(
                     'Choose Appearance',
-                    style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(ctx).textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 ListTile(
@@ -313,7 +318,9 @@ class ProfileScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.dark_mode_rounded),
                   title: const Text('Dark'),
-                  subtitle: const Text('Gentle on tired eyes during night feeds'),
+                  subtitle: const Text(
+                    'Gentle on tired eyes during night feeds',
+                  ),
                   trailing: current == ThemeMode.dark
                       ? Icon(Icons.check_circle_rounded, color: activeColor)
                       : const Icon(Icons.circle_outlined),
@@ -353,9 +360,8 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     'Privacy & Data Policy',
-                    style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(ctx).textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -365,9 +371,8 @@ class ProfileScreen extends StatelessWidget {
                 'When you use a local account, no trackers, telemetry, or external servers '
                 'store your name, notes, or entries. Everything stays inside this application '
                 'and secure storage on your phone.',
-                style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                      height: 1.5,
-                    ),
+                style: Theme.of(ctx).textTheme.bodyMedium
+                    ?.copyWith(height: 1.5),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -410,9 +415,7 @@ class ProfileScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile & Settings'),
-      ),
+      appBar: AppBar(title: const Text('Profile & Settings')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
@@ -436,10 +439,13 @@ class ProfileScreen extends StatelessWidget {
                             radius: 38,
                             backgroundColor: theme.colorScheme.primaryContainer,
                             backgroundImage:
-                                (user?.photoUrl != null && user!.photoUrl!.isNotEmpty)
-                                    ? NetworkImage(user.photoUrl!)
-                                    : null,
-                            child: (user?.photoUrl == null || user!.photoUrl!.isEmpty)
+                                (user?.photoUrl != null &&
+                                    user!.photoUrl!.isNotEmpty)
+                                ? NetworkImage(user.photoUrl!)
+                                : null,
+                            child:
+                                (user?.photoUrl == null ||
+                                    user!.photoUrl!.isEmpty)
                                 ? Text(
                                     displayName.isNotEmpty
                                         ? displayName[0].toUpperCase()
@@ -468,8 +474,9 @@ class ProfileScreen extends StatelessWidget {
                             Text(
                               user!.email!,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.7),
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.7,
+                                ),
                               ),
                             ),
                           ],
@@ -485,16 +492,18 @@ class ProfileScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: isLocal
                                   ? theme.colorScheme.secondaryContainer
-                                      .withValues(alpha: 0.5)
+                                        .withValues(alpha: 0.5)
                                   : theme.colorScheme.primaryContainer
-                                      .withValues(alpha: 0.5),
+                                        .withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                 color: isLocal
-                                    ? theme.colorScheme.secondary
-                                        .withValues(alpha: 0.4)
-                                    : theme.colorScheme.primary
-                                        .withValues(alpha: 0.4),
+                                    ? theme.colorScheme.secondary.withValues(
+                                        alpha: 0.4,
+                                      )
+                                    : theme.colorScheme.primary.withValues(
+                                        alpha: 0.4,
+                                      ),
                               ),
                             ),
                             child: Row(
@@ -600,7 +609,9 @@ class ProfileScreen extends StatelessWidget {
                           ListTile(
                             leading: const Icon(Icons.info_outline_rounded),
                             title: const Text('Google Account Details'),
-                            subtitle: Text(user?.email ?? 'Connected with Google'),
+                            subtitle: Text(
+                              user?.email ?? 'Connected with Google',
+                            ),
                           ),
                           const Divider(),
 
@@ -612,7 +623,8 @@ class ProfileScreen extends StatelessWidget {
                               'Profile & credentials managed via Google',
                             ),
                             trailing: const Icon(Icons.chevron_right_rounded),
-                            onTap: () => _showManageGoogleAccountDialog(context),
+                            onTap: () =>
+                                _showManageGoogleAccountDialog(context),
                           ),
                           const Divider(),
 
@@ -629,7 +641,9 @@ class ProfileScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            subtitle: const Text('Sign out of your Google account'),
+                            subtitle: const Text(
+                              'Sign out of your Google account',
+                            ),
                             trailing: const Icon(Icons.chevron_right_rounded),
                             onTap: () => _handleGoogleSignOut(context),
                           ),
@@ -660,7 +674,9 @@ class ProfileScreen extends StatelessWidget {
                         ListTile(
                           leading: const Icon(Icons.notifications_outlined),
                           title: const Text('Notifications'),
-                          subtitle: const Text('Gentle reminders (Coming soon)'),
+                          subtitle: const Text(
+                            'Gentle reminders (Coming soon)',
+                          ),
                           trailing: Switch(
                             value: false,
                             onChanged: (val) {
@@ -690,8 +706,10 @@ class ProfileScreen extends StatelessWidget {
                         // Journal App Lock
                         Builder(
                           builder: (context) {
-                            final journalProvider = Provider.of<JournalProvider?>(context);
-                            final isLockEnabled = journalProvider?.isLockEnabled ?? false;
+                            final journalProvider =
+                                Provider.of<JournalProvider?>(context);
+                            final isLockEnabled =
+                                journalProvider?.isLockEnabled ?? false;
                             return ListTile(
                               leading: const Icon(Icons.lock_person_outlined),
                               title: const Text('Journal Lock'),
@@ -751,13 +769,11 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.65),
-              letterSpacing: 0.5,
-            ),
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.onSurface
+              .withValues(alpha: 0.65),
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }

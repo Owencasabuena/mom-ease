@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+
 import '../models/mood_entry.dart';
 import '../models/mood_type.dart';
 import 'mood_repository.dart';
@@ -15,8 +16,7 @@ class LocalMoodRepository implements MoodRepository {
       '${userId}_${date.year}_${date.month}_${date.day}';
 
   /// Strips hours/minutes/seconds to ensure one entry per calendar day.
-  DateTime _normalise(DateTime dt) =>
-      DateTime(dt.year, dt.month, dt.day);
+  DateTime _normalise(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   // ── Read ─────────────────────────────────────────────────────────────────────
 
@@ -27,18 +27,17 @@ class LocalMoodRepository implements MoodRepository {
 
   @override
   Future<List<MoodEntry>> getMoodsForMonth(
-      String userId, int year, int month) async {
+    String userId,
+    int year,
+    int month,
+  ) async {
     return _box.values.where((e) {
-      return e.userId == userId &&
-          e.date.year == year &&
-          e.date.month == month;
-    }).toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+      return e.userId == userId && e.date.year == year && e.date.month == month;
+    }).toList()..sort((a, b) => a.date.compareTo(b.date));
   }
 
   @override
-  Future<List<MoodEntry>> getRecentMoods(String userId,
-      {int days = 7}) async {
+  Future<List<MoodEntry>> getRecentMoods(String userId, {int days = 7}) async {
     final cutoff = _normalise(DateTime.now())
         .subtract(Duration(days: days - 1));
     return _box.values
@@ -49,7 +48,10 @@ class LocalMoodRepository implements MoodRepository {
 
   @override
   Future<Map<MoodType, int>> getMoodCountsForMonth(
-      String userId, int year, int month) async {
+    String userId,
+    int year,
+    int month,
+  ) async {
     final entries = await getMoodsForMonth(userId, year, month);
     final counts = <MoodType, int>{for (final m in MoodType.values) m: 0};
     for (final e in entries) {

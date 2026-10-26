@@ -29,20 +29,20 @@ class LessonProgress {
   }
 
   Map<String, dynamic> toMap() => {
-        'lessonId': lessonId,
-        'isCompleted': isCompleted,
-        'isBookmarked': isBookmarked,
-        'lastOpenedAt': lastOpenedAt?.toIso8601String(),
-      };
+    'lessonId': lessonId,
+    'isCompleted': isCompleted,
+    'isBookmarked': isBookmarked,
+    'lastOpenedAt': lastOpenedAt?.toIso8601String(),
+  };
 
   factory LessonProgress.fromMap(Map<String, dynamic> map) => LessonProgress(
-        lessonId: map['lessonId'] as String,
-        isCompleted: map['isCompleted'] as bool? ?? false,
-        isBookmarked: map['isBookmarked'] as bool? ?? false,
-        lastOpenedAt: map['lastOpenedAt'] != null
-            ? DateTime.tryParse(map['lastOpenedAt'] as String)
-            : null,
-      );
+    lessonId: map['lessonId'] as String,
+    isCompleted: map['isCompleted'] as bool? ?? false,
+    isBookmarked: map['isBookmarked'] as bool? ?? false,
+    lastOpenedAt: map['lastOpenedAt'] != null
+        ? DateTime.tryParse(map['lastOpenedAt'] as String)
+        : null,
+  );
 
   String toJson() => jsonEncode(toMap());
 

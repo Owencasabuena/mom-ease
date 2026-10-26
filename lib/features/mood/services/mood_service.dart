@@ -1,4 +1,4 @@
-﻿import '../models/mood_entry.dart';
+import '../models/mood_entry.dart';
 import '../models/mood_type.dart';
 import '../repositories/mood_repository.dart';
 
@@ -12,11 +12,13 @@ class MoodService {
 
   /// Returns true when the user has logged [threshold] or more very-sad moods
   /// in the past [days] days. Used to show the gentle support banner.
-  Future<bool> shouldShowSupportMessage(String userId,
-      {int threshold = 3, int days = 7}) async {
+  Future<bool> shouldShowSupportMessage(
+    String userId, {
+    int threshold = 3,
+    int days = 7,
+  }) async {
     final recent = await _repo.getRecentMoods(userId, days: days);
-    final verySadCount =
-        recent.where((e) => e.mood == MoodType.verySad).length;
+    final verySadCount = recent.where((e) => e.mood == MoodType.verySad).length;
     return verySadCount >= threshold;
   }
 
@@ -26,12 +28,16 @@ class MoodService {
       _repo.getMoodForDate(userId, date);
 
   Future<List<MoodEntry>> getMoodsForMonth(
-          String userId, int year, int month) =>
-      _repo.getMoodsForMonth(userId, year, month);
+    String userId,
+    int year,
+    int month,
+  ) => _repo.getMoodsForMonth(userId, year, month);
 
   Future<Map<MoodType, int>> getMoodCountsForMonth(
-          String userId, int year, int month) =>
-      _repo.getMoodCountsForMonth(userId, year, month);
+    String userId,
+    int year,
+    int month,
+  ) => _repo.getMoodCountsForMonth(userId, year, month);
 
   Future<bool> hasMoodForDate(String userId, DateTime date) =>
       _repo.hasMoodForDate(userId, date);
@@ -44,7 +50,10 @@ class MoodService {
 
   /// Average mood value for a month; null when no entries exist.
   Future<double?> averageMoodForMonth(
-      String userId, int year, int month) async {
+    String userId,
+    int year,
+    int month,
+  ) async {
     final entries = await _repo.getMoodsForMonth(userId, year, month);
     if (entries.isEmpty) return null;
     final total = entries.fold<int>(0, (sum, e) => sum + e.moodValue);

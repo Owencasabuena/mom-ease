@@ -8,10 +8,7 @@ abstract class AuthService {
   Future<UserModel?> getCurrentUser();
 
   /// Creates or logs into a local offline account.
-  Future<UserModel> signInLocally({
-    required String displayName,
-    String? pin,
-  });
+  Future<UserModel> signInLocally({required String displayName, String? pin});
 
   /// Signs in with Google via Firebase Authentication.
   Future<UserModel> signInWithGoogle();
@@ -20,10 +17,7 @@ abstract class AuthService {
   Future<UserModel> updateDisplayName(String newName);
 
   /// Updates or sets the user's local PIN/password.
-  Future<void> updateLocalPin({
-    String? oldPin,
-    required String newPin,
-  });
+  Future<void> updateLocalPin({String? oldPin, required String newPin});
 
   /// Signs out of the current session.
   Future<void> signOut();

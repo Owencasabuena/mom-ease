@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/mood_type.dart';
 import '../state/mood_provider.dart';
 
@@ -63,8 +65,9 @@ class MoodStatistics extends StatelessWidget {
         if (asCard) ...[
           Text(
             'Monthly Summary',
-            style: theme.textTheme.titleSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
         ],
@@ -85,8 +88,7 @@ class MoodStatistics extends StatelessWidget {
           final count = counts[m] ?? 0;
           final pct = total > 0 ? count / total : 0.0;
           return Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
             child: Row(
               children: [
                 Container(
@@ -99,23 +101,21 @@ class MoodStatistics extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(m.label,
-                      style: theme.textTheme.bodySmall),
+                  child: Text(m.label, style: theme.textTheme.bodySmall),
                 ),
                 Text(
                   '$count',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
                   width: 80,
                   child: LinearProgressIndicator(
                     value: pct,
-                    backgroundColor:
-                        theme.colorScheme.surfaceContainerHighest,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(m.color),
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    valueColor: AlwaysStoppedAnimation<Color>(m.color),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -151,10 +151,7 @@ class MoodStatistics extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: content,
-        ),
+        child: Padding(padding: const EdgeInsets.all(20), child: content),
       ),
     );
   }
@@ -202,9 +199,8 @@ class _HalfDonutChart extends StatelessWidget {
               top: archCenterY - 18,
               child: Text(
                 '$total',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(context).textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -256,13 +252,7 @@ class _HalfDonutPainter extends CustomPainter {
       if (count == 0) continue;
       final sweep = math.pi * (count / total);
       paint.color = mood.color;
-      canvas.drawArc(
-        arcRect,
-        startAngle,
-        sweep,
-        false,
-        paint,
-      );
+      canvas.drawArc(arcRect, startAngle, sweep, false, paint);
       startAngle += sweep;
     }
 

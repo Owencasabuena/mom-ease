@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../mood/models/mood_type.dart';
 
 /// Horizontal mood selector allowing mothers to optionally tag a journal entry with a mood.
@@ -54,10 +55,8 @@ class JournalMoodSelector extends StatelessWidget {
                   mood.assetPath,
                   width: 28,
                   height: 28,
-                  errorBuilder: (context, error, stackTrace) => Text(
-                    mood.emoji,
-                    style: const TextStyle(fontSize: 22),
-                  ),
+                  errorBuilder: (context, error, stackTrace) =>
+                      Text(mood.emoji, style: const TextStyle(fontSize: 22)),
                 ),
                 accentColor: mood.color,
                 onTap: () => onMoodSelected(isSelected ? null : mood),
@@ -104,9 +103,7 @@ class JournalMoodSelector extends StatelessWidget {
                 width: isSelected ? 2 : 1,
               ),
             ),
-            child: Center(
-              child: iconWidget,
-            ),
+            child: Center(child: iconWidget),
           ),
         ),
       ),

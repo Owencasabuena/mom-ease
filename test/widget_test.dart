@@ -33,7 +33,10 @@ class _FakeMoodRepository implements MoodRepository {
 
   @override
   Future<Map<MoodType, int>> getMoodCountsForMonth(
-      String userId, int year, int month) async {
+    String userId,
+    int year,
+    int month,
+  ) async {
     final list = await getMoodsForMonth(userId, year, month);
     final map = {for (final m in MoodType.values) m: 0};
     for (final e in list) {
@@ -49,12 +52,17 @@ class _FakeMoodRepository implements MoodRepository {
 
   @override
   Future<List<MoodEntry>> getMoodsForMonth(
-      String userId, int year, int month) async {
+    String userId,
+    int year,
+    int month,
+  ) async {
     return _entries.values
-        .where((e) =>
-            e.userId == userId &&
-            e.date.year == year &&
-            e.date.month == month)
+        .where(
+          (e) =>
+              e.userId == userId &&
+              e.date.year == year &&
+              e.date.month == month,
+        )
         .toList();
   }
 
@@ -65,7 +73,9 @@ class _FakeMoodRepository implements MoodRepository {
 
   @override
   Future<bool> hasMoodForDate(String userId, DateTime date) async {
-    return _entries.containsKey('${userId}_${date.year}_${date.month}_${date.day}');
+    return _entries.containsKey(
+      '${userId}_${date.year}_${date.month}_${date.day}',
+    );
   }
 
   @override
@@ -96,7 +106,10 @@ void main() {
       storageService = StorageService(prefs);
       authProvider = AuthProvider(storageService);
       themeProvider = ThemeProvider(storageService);
-      moodProvider = MoodProvider(MoodService(_FakeMoodRepository()), 'test_user');
+      moodProvider = MoodProvider(
+        MoodService(_FakeMoodRepository()),
+        'test_user',
+      );
       await authProvider.initialize();
     });
 
@@ -108,62 +121,78 @@ void main() {
           ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
           ChangeNotifierProvider<MoodProvider>.value(value: moodProvider),
         ],
-        child: MaterialApp(
-          theme: AppTheme.lightTheme,
-          home: child,
-        ),
+        child: MaterialApp(theme: AppTheme.lightTheme, home: child),
       );
     }
 
-    testWidgets('AuthScreen displays welcoming header, options, and privacy notice',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget(const AuthScreen()));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'AuthScreen displays welcoming header, options, and privacy notice',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(createTestWidget(const AuthScreen()));
+        await tester.pumpAndSettle();
 
-      // Check header and tagline
-      expect(find.text('MomEase'), findsOneWidget);
-      expect(
-        find.text('Support for every step of your postpartum journey.'),
-        findsOneWidget,
-      );
+        // Check header and tagline
+        expect(find.text('MomEase'), findsOneWidget);
+        expect(
+          find.text('Support for every step of your postpartum journey.'),
+          findsOneWidget,
+        );
 
-      // Check authentication buttons
-      expect(find.byKey(const Key('continue_with_google_btn')), findsOneWidget);
-      expect(find.byKey(const Key('continue_locally_btn')), findsOneWidget);
+        // Check authentication buttons
+        expect(
+          find.byKey(const Key('continue_with_google_btn')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('continue_locally_btn')), findsOneWidget);
 
-      // Check privacy guarantee
-      expect(
-        find.text('Using MomEase locally keeps your personal entries on this device.'),
-        findsOneWidget,
-      );
-    });
+        // Check privacy guarantee
+        expect(
+          find.text(
+            'Using MomEase locally keeps your personal entries on this device.',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
 
-    testWidgets('Tapping Continue with Google when unconfigured shows friendly notice',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget(const AuthScreen()));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'Tapping Continue with Google when unconfigured shows friendly notice',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(createTestWidget(const AuthScreen()));
+        await tester.pumpAndSettle();
 
-      // Tap Google sign in
-      await tester.tap(find.byKey(const Key('continue_with_google_btn')));
-      await tester.pumpAndSettle();
+        // Tap Google sign in
+        await tester.tap(find.byKey(const Key('continue_with_google_btn')));
+        await tester.pumpAndSettle();
 
-      // Verify friendly dialog
-      expect(find.text('Google Sign-In Notice'), findsOneWidget);
-      expect(find.widgetWithText(FilledButton, 'Continue Locally'), findsOneWidget);
-    });
+        // Verify friendly dialog
+        expect(find.text('Google Sign-In Notice'), findsOneWidget);
+        expect(
+          find.widgetWithText(FilledButton, 'Continue Locally'),
+          findsOneWidget,
+        );
+      },
+    );
 
-    testWidgets('Local setup screen validates input and registers local mama',
-        (WidgetTester tester) async {
+    testWidgets('Local setup screen validates input and registers local mama', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestWidget(const LocalSetupScreen()));
       await tester.pumpAndSettle();
 
       // Try submitting empty
       await tester.tap(find.byKey(const Key('submit_local_setup_btn')));
       await tester.pumpAndSettle();
-      expect(find.text('Please enter your name or preferred nickname'), findsOneWidget);
+      expect(
+        find.text('Please enter your name or preferred nickname'),
+        findsOneWidget,
+      );
 
       // Enter valid name
-      await tester.enterText(find.byKey(const Key('name_input_field')), 'Sarah');
+      await tester.enterText(
+        find.byKey(const Key('name_input_field')),
+        'Sarah',
+      );
       await tester.tap(find.byKey(const Key('submit_local_setup_btn')));
       await tester.pumpAndSettle();
 
@@ -173,23 +202,26 @@ void main() {
       expect(authProvider.currentUser?.isLocal, isTrue);
     });
 
-    testWidgets('HomeScreen displays maternal greeting and profile navigation icon',
-        (WidgetTester tester) async {
-      await authProvider.continueLocally(displayName: 'Elena');
+    testWidgets(
+      'HomeScreen displays maternal greeting and profile navigation icon',
+      (WidgetTester tester) async {
+        await authProvider.continueLocally(displayName: 'Elena');
 
-      await tester.pumpWidget(createTestWidget(const HomeScreen()));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createTestWidget(const HomeScreen()));
+        await tester.pumpAndSettle();
 
-      expect(find.textContaining('Elena'), findsOneWidget);
-      expect(find.byIcon(Icons.account_circle_outlined), findsOneWidget);
+        expect(find.textContaining('Elena'), findsOneWidget);
+        expect(find.byIcon(Icons.account_circle_outlined), findsOneWidget);
 
-      // Verify Mood Tracker home features
-      expect(find.text('Log Your Mood'), findsOneWidget);
-      expect(find.text('Suggested for you'), findsOneWidget);
-    });
+        // Verify Mood Tracker home features
+        expect(find.text('Log Your Mood'), findsOneWidget);
+        expect(find.text('Suggested for you'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ProfileScreen shows local account info and options',
-        (WidgetTester tester) async {
+    testWidgets('ProfileScreen shows local account info and options', (
+      WidgetTester tester,
+    ) async {
       await authProvider.continueLocally(displayName: 'Hannah');
 
       await tester.pumpWidget(createTestWidget(const ProfileScreen()));
@@ -237,63 +269,72 @@ void main() {
     });
 
     testWidgets(
-        'LogMoodBottomSheet renders without overflow on narrow screens',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(320 * 2, 640 * 2);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+      'LogMoodBottomSheet renders without overflow on narrow screens',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(320 * 2, 640 * 2);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
-      await tester.pumpWidget(createTestWidget(Builder(
-        builder: (ctx) => ElevatedButton(
-          onPressed: () => showLogMoodSheet(ctx),
-          child: const Text('Open Sheet'),
-        ),
-      )));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          createTestWidget(
+            Builder(
+              builder: (ctx) => ElevatedButton(
+                onPressed: () => showLogMoodSheet(ctx),
+                child: const Text('Open Sheet'),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Open Sheet'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Open Sheet'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('How are you feeling?'), findsOneWidget);
-      expect(find.text('Very Happy'), findsOneWidget);
-      expect(find.text('Very Sad'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+        expect(find.text('How are you feeling?'), findsOneWidget);
+        expect(find.text('Very Happy'), findsOneWidget);
+        expect(find.text('Very Sad'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets(
-        'MoodStatistics renders Monthly Summary and semicircle chart without overflow',
-        (WidgetTester tester) async {
-      // Save 5 entries
-      final now = DateTime.now();
-      await moodProvider.saveMoodForSelectedDate(MoodType.verySad);
-      await moodProvider.selectDate(now.subtract(const Duration(days: 1)));
-      await moodProvider.saveMoodForSelectedDate(MoodType.verySad);
-      await moodProvider.selectDate(now.subtract(const Duration(days: 2)));
-      await moodProvider.saveMoodForSelectedDate(MoodType.verySad);
-      await moodProvider.selectDate(now.subtract(const Duration(days: 3)));
-      await moodProvider.saveMoodForSelectedDate(MoodType.neutral);
-      await moodProvider.selectDate(now.subtract(const Duration(days: 4)));
-      await moodProvider.saveMoodForSelectedDate(MoodType.happy);
+      'MoodStatistics renders Monthly Summary and semicircle chart without overflow',
+      (WidgetTester tester) async {
+        // Save 5 entries
+        final now = DateTime.now();
+        await moodProvider.saveMoodForSelectedDate(MoodType.verySad);
+        await moodProvider.selectDate(now.subtract(const Duration(days: 1)));
+        await moodProvider.saveMoodForSelectedDate(MoodType.verySad);
+        await moodProvider.selectDate(now.subtract(const Duration(days: 2)));
+        await moodProvider.saveMoodForSelectedDate(MoodType.verySad);
+        await moodProvider.selectDate(now.subtract(const Duration(days: 3)));
+        await moodProvider.saveMoodForSelectedDate(MoodType.neutral);
+        await moodProvider.selectDate(now.subtract(const Duration(days: 4)));
+        await moodProvider.saveMoodForSelectedDate(MoodType.happy);
 
-      await tester.pumpWidget(createTestWidget(const SingleChildScrollView(
-        child: MoodStatistics(),
-      )));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          createTestWidget(
+            const SingleChildScrollView(child: MoodStatistics()),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Monthly Summary'), findsOneWidget);
-      expect(find.text('5'), findsOneWidget);
-      expect(find.text('5 check-ins this month'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+        expect(find.text('Monthly Summary'), findsOneWidget);
+        expect(find.text('5'), findsOneWidget);
+        expect(find.text('5 check-ins this month'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
-    testWidgets('CalendarView expands and switches to Summary tab cleanly',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget(const SingleChildScrollView(
-        child: CalendarView(),
-      )));
+    testWidgets('CalendarView expands and switches to Summary tab cleanly', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        createTestWidget(const SingleChildScrollView(child: CalendarView())),
+      );
       await tester.pumpAndSettle();
 
       // Tap header to expand
@@ -314,42 +355,46 @@ void main() {
     });
 
     testWidgets(
-        'CalendarView in compact mode renders horizontal day strip cleanly',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget(const SingleChildScrollView(
-        child: CalendarView(),
-      )));
-      await tester.pumpAndSettle();
+      'CalendarView in compact mode renders horizontal day strip cleanly',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          createTestWidget(const SingleChildScrollView(child: CalendarView())),
+        );
+        await tester.pumpAndSettle();
 
-      final today = DateTime.now();
-      expect(find.text('${today.day}'), findsWidgets);
-      expect(tester.takeException(), isNull);
-    });
+        final today = DateTime.now();
+        expect(find.text('${today.day}'), findsWidgets);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
-    testWidgets('MoodTrackerScreen renders simplified date and consistent check-ins terminology',
-        (WidgetTester tester) async {
-      final now = DateTime.now();
-      await moodProvider.saveMoodForSelectedDate(MoodType.happy);
+    testWidgets(
+      'MoodTrackerScreen renders simplified date and consistent check-ins terminology',
+      (WidgetTester tester) async {
+        final now = DateTime.now();
+        await moodProvider.saveMoodForSelectedDate(MoodType.happy);
 
-      await tester.pumpWidget(createTestWidget(const MoodTrackerScreen()));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createTestWidget(const MoodTrackerScreen()));
+        await tester.pumpAndSettle();
 
-      // Simplified top date format: e.g. Monday, October 26 (no duplicate year)
-      final expectedDate = DateFormat('EEEE, MMMM d').format(now);
-      expect(find.text(expectedDate), findsOneWidget);
+        // Simplified top date format: e.g. Monday, October 26 (no duplicate year)
+        final expectedDate = DateFormat('EEEE, MMMM d').format(now);
+        expect(find.text(expectedDate), findsOneWidget);
 
-      // Month header uses "check-ins" instead of "logged"
-      expect(find.textContaining('logged'), findsNothing);
-      expect(find.text('1 check-in'), findsOneWidget);
+        // Month header uses "check-ins" instead of "logged"
+        expect(find.textContaining('logged'), findsNothing);
+        expect(find.text('1 check-in'), findsOneWidget);
 
-      // Hero mood card displays Update Mood and Add Journal Entry
-      expect(find.text('Happy'), findsWidgets);
-      expect(find.text('Update Mood'), findsOneWidget);
-      expect(find.text('Add Journal Entry'), findsOneWidget);
-    });
+        // Hero mood card displays Update Mood and Add Journal Entry
+        expect(find.text('Happy'), findsWidgets);
+        expect(find.text('Update Mood'), findsOneWidget);
+        expect(find.text('Add Journal Entry'), findsOneWidget);
+      },
+    );
 
-    testWidgets('Horizontal day strip selects dates and updates mood card',
-        (WidgetTester tester) async {
+    testWidgets('Horizontal day strip selects dates and updates mood card', (
+      WidgetTester tester,
+    ) async {
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
 
@@ -367,10 +412,12 @@ void main() {
       expect(find.text('Happy'), findsWidgets);
 
       // Tap yesterday in the day strip (inside ListView)
-      final dayFinder = find.descendant(
-        of: find.byType(ListView),
-        matching: find.text('${yesterday.day}'),
-      ).first;
+      final dayFinder = find
+          .descendant(
+            of: find.byType(ListView),
+            matching: find.text('${yesterday.day}'),
+          )
+          .first;
       await tester.tap(dayFinder);
       await tester.pumpAndSettle();
 
@@ -390,4 +437,3 @@ void main() {
     });
   });
 }
-

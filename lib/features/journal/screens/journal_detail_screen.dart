@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/theme/app_colors.dart';
 import '../../lessons/models/lesson.dart';
 import '../../lessons/providers/lesson_provider.dart';
 import '../../lessons/screens/lesson_detail_screen.dart';
@@ -15,10 +17,7 @@ import 'journal_editor_screen.dart';
 class JournalDetailScreen extends StatelessWidget {
   final JournalEntry entry;
 
-  const JournalDetailScreen({
-    super.key,
-    required this.entry,
-  });
+  const JournalDetailScreen({super.key, required this.entry});
 
   IconData _categoryIcon(String category) {
     switch (category) {
@@ -67,7 +66,9 @@ class JournalDetailScreen extends StatelessWidget {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Could not delete entry. Please try again.'),
+                      content: Text(
+                        'Could not delete entry. Please try again.',
+                      ),
                     ),
                   );
                 }
@@ -126,10 +127,14 @@ class JournalDetailScreen extends StatelessWidget {
         title: const Text('Journal Entry'),
         actions: [
           IconButton(
-            tooltip: currentEntry.isFavorite ? 'Remove from favorites' : 'Add to favorites',
+            tooltip: currentEntry.isFavorite
+                ? 'Remove from favorites'
+                : 'Add to favorites',
             icon: Icon(
-              currentEntry.isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
-              color: currentEntry.isFavorite ? Colors.amber : null,
+              currentEntry.isFavorite
+                  ? Icons.star_rounded
+                  : Icons.star_outline_rounded,
+              color: currentEntry.isFavorite ? AppColors.favoriteStar : null,
             ),
             onPressed: () {
               journalProvider.toggleFavorite(currentEntry.id);
@@ -141,9 +146,8 @@ class JournalDetailScreen extends StatelessWidget {
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => JournalEditorScreen(
-                    existingEntry: currentEntry,
-                  ),
+                  builder: (_) =>
+                      JournalEditorScreen(existingEntry: currentEntry),
                 ),
               );
             },
@@ -179,9 +183,14 @@ class JournalDetailScreen extends StatelessWidget {
                 ),
                 if (currentEntry.inputMethod == JournalInputMethod.voice)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.6,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -205,9 +214,14 @@ class JournalDetailScreen extends StatelessWidget {
                   )
                 else if (currentEntry.inputMethod == JournalInputMethod.mixed)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
+                      color: theme.colorScheme.secondaryContainer.withValues(
+                        alpha: 0.6,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -236,21 +250,19 @@ class JournalDetailScreen extends StatelessWidget {
             // Linked Mood Badge
             if (mood != null) ...[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: mood.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: mood.color.withValues(alpha: 0.35),
-                  ),
+                  border: Border.all(color: mood.color.withValues(alpha: 0.35)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      mood.emoji,
-                      style: const TextStyle(fontSize: 18),
-                    ),
+                    Text(mood.emoji, style: const TextStyle(fontSize: 18)),
                     const SizedBox(width: 8),
                     Text(
                       mood.label,
@@ -271,10 +283,14 @@ class JournalDetailScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
                 ),
                 child: Column(
@@ -312,7 +328,8 @@ class JournalDetailScreen extends StatelessWidget {
             ],
 
             // Title (optional)
-            if (currentEntry.title != null && currentEntry.title!.trim().isNotEmpty) ...[
+            if (currentEntry.title != null &&
+                currentEntry.title!.trim().isNotEmpty) ...[
               Text(
                 currentEntry.title!.trim(),
                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -343,7 +360,9 @@ class JournalDetailScreen extends StatelessWidget {
                     label: Text('#$tag'),
                     backgroundColor: theme.colorScheme.surfaceContainerLow,
                     side: BorderSide(
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.4,
+                      ),
                     ),
                     labelStyle: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -358,7 +377,9 @@ class JournalDetailScreen extends StatelessWidget {
             ],
 
             // Metadata: Created & Updated
-            Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+            Divider(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 8),
             Text.rich(
               TextSpan(
@@ -373,9 +394,12 @@ class JournalDetailScreen extends StatelessWidget {
                   ),
                   const TextSpan(text: ' '),
                   TextSpan(
-                    text: 'Created ${DateFormat('MMM d, y h:mm a').format(currentEntry.createdAt)}',
+                    text:
+                        'Created ${DateFormat('MMM d, y h:mm a').format(currentEntry.createdAt)}',
                   ),
-                  if (currentEntry.updatedAt.isAfter(currentEntry.createdAt.add(const Duration(seconds: 1)))) ...[
+                  if (currentEntry.updatedAt.isAfter(
+                    currentEntry.createdAt.add(const Duration(seconds: 1)),
+                  )) ...[
                     const TextSpan(text: '  •  '),
                     WidgetSpan(
                       alignment: PlaceholderAlignment.middle,
@@ -387,7 +411,8 @@ class JournalDetailScreen extends StatelessWidget {
                     ),
                     const TextSpan(text: ' '),
                     TextSpan(
-                      text: 'Edited ${DateFormat('MMM d, y h:mm a').format(currentEntry.updatedAt)}',
+                      text:
+                          'Edited ${DateFormat('MMM d, y h:mm a').format(currentEntry.updatedAt)}',
                     ),
                   ],
                 ],
@@ -408,7 +433,9 @@ class JournalDetailScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 28),
                     Text(
-                      isTl ? 'Maaaring makatulong din sa iyo' : 'You may also find this helpful',
+                      isTl
+                          ? 'Maaaring makatulong din sa iyo'
+                          : 'You may also find this helpful',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -416,18 +443,23 @@ class JournalDetailScreen extends StatelessWidget {
                     const SizedBox(height: 10),
                     Card(
                       elevation: 0,
-                      color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.35),
+                      color: theme.colorScheme.secondaryContainer.withValues(
+                        alpha: 0.35,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                         side: BorderSide(
-                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                          color: theme.colorScheme.outlineVariant.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                       child: InkWell(
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => LessonDetailScreen(lesson: suggested),
+                              builder: (_) =>
+                                  LessonDetailScreen(lesson: suggested),
                             ),
                           );
                         },
@@ -441,11 +473,16 @@ class JournalDetailScreen extends StatelessWidget {
                                 child: Container(
                                   width: 56,
                                   height: 56,
-                                  color: (mood != null ? mood.color : theme.colorScheme.primary)
-                                      .withValues(alpha: 0.2),
+                                  color:
+                                      (mood != null
+                                              ? mood.color
+                                              : theme.colorScheme.primary)
+                                          .withValues(alpha: 0.2),
                                   child: Icon(
                                     _categoryIcon(suggested.category),
-                                    color: mood != null ? mood.color : theme.colorScheme.primary,
+                                    color: mood != null
+                                        ? mood.color
+                                        : theme.colorScheme.primary,
                                     size: 28,
                                   ),
                                 ),
@@ -457,25 +494,30 @@ class JournalDetailScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       suggested.localizedTitle(lang),
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       '${suggested.readingTimeMinutes} min • ${suggested.category}',
-                                      style: theme.textTheme.labelSmall?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
-                                      ),
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.chevron_right_rounded,
-                                color: Colors.grey,
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.6),
                               ),
                             ],
                           ),

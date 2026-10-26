@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/lesson.dart';
 
 class FeaturedLessonCard extends StatelessWidget {
@@ -46,7 +47,10 @@ class FeaturedLessonCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(20),
@@ -54,16 +58,16 @@ class FeaturedLessonCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.auto_awesome_rounded,
                           size: 14,
-                          color: Colors.white,
+                          color: theme.colorScheme.onPrimary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           isTl ? 'Para sa iyo' : 'Recommended for you',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -124,7 +128,10 @@ class FeaturedLessonCard extends StatelessWidget {
                   if (lesson.hasVideo) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surface.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(6),
@@ -154,7 +161,10 @@ class FeaturedLessonCard extends StatelessWidget {
                   FilledButton.tonalIcon(
                     onPressed: onTap,
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),

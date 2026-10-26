@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/lesson_provider.dart';
 import '../widgets/lesson_card.dart';
 import 'lesson_detail_screen.dart';
@@ -65,8 +66,9 @@ class SavedLessonsScreen extends StatelessWidget {
               itemCount: saved.length,
               itemBuilder: (context, index) {
                 final lesson = saved[index];
-                final isCompleted =
-                    lessonProvider.completedIds.contains(lesson.id);
+                final isCompleted = lessonProvider.completedIds.contains(
+                  lesson.id,
+                );
 
                 return LessonCard(
                   lesson: lesson,

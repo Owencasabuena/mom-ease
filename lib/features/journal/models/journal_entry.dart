@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:hive/hive.dart';
+
 import '../../mood/models/mood_type.dart';
 
 /// Hive typeId for JournalEntry.
@@ -113,34 +115,34 @@ class JournalEntry extends HiveObject {
   }
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'userId': userId,
-        'date': date.toIso8601String(),
-        'title': title,
-        'content': content,
-        'moodId': moodId,
-        'tags': tags,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-        'isFavorite': isFavorite,
-        'promptId': promptId,
-        'inputMethod': inputMethod,
-      };
+    'id': id,
+    'userId': userId,
+    'date': date.toIso8601String(),
+    'title': title,
+    'content': content,
+    'moodId': moodId,
+    'tags': tags,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'isFavorite': isFavorite,
+    'promptId': promptId,
+    'inputMethod': inputMethod,
+  };
 
   factory JournalEntry.fromMap(Map<String, dynamic> map) => JournalEntry(
-        id: map['id'] as String,
-        userId: map['userId'] as String,
-        date: DateTime.parse(map['date'] as String),
-        title: map['title'] as String?,
-        content: map['content'] as String,
-        moodId: map['moodId'] as String?,
-        tags: List<String>.from(map['tags'] ?? []),
-        createdAt: DateTime.parse(map['createdAt'] as String),
-        updatedAt: DateTime.parse(map['updatedAt'] as String),
-        isFavorite: map['isFavorite'] as bool? ?? false,
-        promptId: map['promptId'] as String?,
-        inputMethod: map['inputMethod'] as String? ?? 'typed',
-      );
+    id: map['id'] as String,
+    userId: map['userId'] as String,
+    date: DateTime.parse(map['date'] as String),
+    title: map['title'] as String?,
+    content: map['content'] as String,
+    moodId: map['moodId'] as String?,
+    tags: List<String>.from(map['tags'] ?? []),
+    createdAt: DateTime.parse(map['createdAt'] as String),
+    updatedAt: DateTime.parse(map['updatedAt'] as String),
+    isFavorite: map['isFavorite'] as bool? ?? false,
+    promptId: map['promptId'] as String?,
+    inputMethod: map['inputMethod'] as String? ?? 'typed',
+  );
 
   String toJson() => jsonEncode(toMap());
 

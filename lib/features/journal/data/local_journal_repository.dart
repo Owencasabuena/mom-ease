@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+
 import '../models/journal_entry.dart';
 import 'journal_repository.dart';
 
@@ -7,7 +8,7 @@ class LocalJournalRepository implements JournalRepository {
   static const String boxName = 'journalBox';
 
   Box<JournalEntry> get _box => Hive.box<JournalEntry>(boxName);
- 
+
   /// Checks whether an entry belongs to the querying user.
   /// Handles fallback and migration between generic 'local_user' and specific local user IDs.
   bool _matchesUser(String entryUserId, String queryUserId) {
@@ -58,26 +59,29 @@ class LocalJournalRepository implements JournalRepository {
 
   @override
   Future<List<JournalEntry>> getEntriesForDate(
-      String userId, DateTime date) async {
+    String userId,
+    DateTime date,
+  ) async {
     final list = _box.values.where((e) {
       return _matchesUser(e.userId, userId) &&
           e.date.year == date.year &&
           e.date.month == date.month &&
           e.date.day == date.day;
-    }).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
   }
 
   @override
   Future<List<JournalEntry>> getEntriesForMonth(
-      String userId, int year, int month) async {
+    String userId,
+    int year,
+    int month,
+  ) async {
     final list = _box.values.where((e) {
       return _matchesUser(e.userId, userId) &&
           e.date.year == year &&
           e.date.month == month;
-    }).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
   }
 
@@ -92,18 +96,18 @@ class LocalJournalRepository implements JournalRepository {
       final matchContent = e.content.toLowerCase().contains(trimmed);
       final matchTags = e.tags.any((t) => t.toLowerCase().contains(trimmed));
       return matchTitle || matchContent || matchTags;
-    }).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return list;
   }
 
   @override
   Future<List<JournalEntry>> getFavoriteEntries(String userId) async {
-    final list = _box.values
-        .where((e) => _matchesUser(e.userId, userId) && e.isFavorite)
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final list =
+        _box.values
+            .where((e) => _matchesUser(e.userId, userId) && e.isFavorite)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
   }
 }

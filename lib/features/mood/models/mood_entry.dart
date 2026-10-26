@@ -1,4 +1,5 @@
-﻿import 'package:hive/hive.dart';
+import 'package:hive/hive.dart';
+
 import 'mood_type.dart';
 
 /// Hive typeId for MoodEntry.
@@ -43,11 +44,7 @@ class MoodEntry extends HiveObject {
 
   MoodType get mood => MoodTypeX.fromValue(moodValue);
 
-  MoodEntry copyWith({
-    int? moodValue,
-    String? note,
-    DateTime? updatedAt,
-  }) =>
+  MoodEntry copyWith({int? moodValue, String? note, DateTime? updatedAt}) =>
       MoodEntry(
         id: id,
         userId: userId,
@@ -84,12 +81,19 @@ class MoodEntryAdapter extends TypeAdapter<MoodEntry> {
   @override
   void write(BinaryWriter writer, MoodEntry obj) {
     writer.writeByte(7);
-    writer.writeByte(0); writer.write(obj.id);
-    writer.writeByte(1); writer.write(obj.userId);
-    writer.writeByte(2); writer.write(obj.date);
-    writer.writeByte(3); writer.write(obj.moodValue);
-    writer.writeByte(4); writer.write(obj.note);
-    writer.writeByte(5); writer.write(obj.createdAt);
-    writer.writeByte(6); writer.write(obj.updatedAt);
+    writer.writeByte(0);
+    writer.write(obj.id);
+    writer.writeByte(1);
+    writer.write(obj.userId);
+    writer.writeByte(2);
+    writer.write(obj.date);
+    writer.writeByte(3);
+    writer.write(obj.moodValue);
+    writer.writeByte(4);
+    writer.write(obj.note);
+    writer.writeByte(5);
+    writer.write(obj.createdAt);
+    writer.writeByte(6);
+    writer.write(obj.updatedAt);
   }
 }

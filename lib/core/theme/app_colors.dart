@@ -1,39 +1,79 @@
 import 'package:flutter/material.dart';
 
-/// Gentle, soothing, postpartum-friendly color palette.
-/// Designed to evoke warmth, comfort, and calm.
-class AppColors {
-  // Brand accents
-  static const Color dustyRose = Color(0xFFBA6868);
-  static const Color dustyRoseLight = Color(0xFFDCA4A4);
-  static const Color dustyRoseDark = Color(0xFF8F4747);
+/// MomEase Finalized Brand Color System & Semantic Tokens.
+/// Follows the brand board specifications:
+/// - Primary: Blush Rose (#E5A193)
+/// - Secondary: Muted Sage (#98A890)
+/// - Accent: Warm Peach (#F2C2B2)
+/// - Background: Warm Cream (#FAF6F0)
+/// - Surface / Card: White (#FFFFFF)
+/// - Primary Text: Dark Navy Charcoal (#2C3A47)
+/// - Secondary Text: Slate Gray (#576574)
+/// - Border / Outline: Soft Warm Gray (#EAE4DC)
+abstract final class AppColors {
+  // Brand Core Colors
+  static const Color primary = Color(0xFFE5A193); // Blush Rose
+  static const Color secondary = Color(0xFF98A890); // Muted Sage
+  static const Color accent = Color(0xFFF2C2B2); // Warm Peach
 
-  static const Color calmingSage = Color(0xFF6E8F82);
-  static const Color calmingSageLight = Color(0xFFA6C2B7);
-  static const Color calmingSageDark = Color(0xFF4C6A5E);
+  // Tonal & Container Variants
+  static const Color primaryLight = Color(0xFFFBF1EE);
+  static const Color primaryContainer = Color(0xFFF7D5CE);
+  static const Color primaryDark = Color(0xFFC77969);
 
-  static const Color warmPeach = Color(0xFFE5A894);
-  static const Color softCream = Color(0xFFFAF6F0);
-  static const Color warmSand = Color(0xFFF3EDE4);
+  static const Color secondaryLight = Color(0xFFEDF2EC);
+  static const Color secondaryContainer = Color(0xFFD4DDD0);
+  static const Color secondaryDark = Color(0xFF6F7E67);
 
-  // Light theme neutrals
-  static const Color lightBg = Color(0xFFFCFAF7);
-  static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSurfaceVariant = Color(0xFFF5EFE8);
-  static const Color lightTextPrimary = Color(0xFF2C2523);
-  static const Color lightTextSecondary = Color(0xFF6E6460);
-  static const Color lightBorder = Color(0xFFE7DFD7);
+  static const Color accentLight = Color(0xFFFCF2EE);
 
-  // Dark theme neutrals
-  static const Color darkBg = Color(0xFF15181B);
-  static const Color darkSurface = Color(0xFF20242A);
-  static const Color darkSurfaceVariant = Color(0xFF2A2F37);
-  static const Color darkTextPrimary = Color(0xFFF3EEEA);
-  static const Color darkTextSecondary = Color(0xFFA39B95);
-  static const Color darkBorder = Color(0xFF383E48);
+  // Light Theme Surfaces & Neutrals
+  static const Color background = Color(0xFFFAF6F0); // Warm Cream
+  static const Color surface = Color(0xFFFFFFFF); // White
+  static const Color surfaceVariant = Color(0xFFF4ECE4); // Warm Sand
+  static const Color textPrimary = Color(0xFF2C3A47); // Dark Navy Charcoal
+  static const Color textSecondary = Color(0xFF576574); // Slate Gray
+  static const Color border = Color(0xFFEAE4DC); // Soft Warm Gray
 
-  // State colors
-  static const Color success = Color(0xFF5D9B75);
-  static const Color warning = Color(0xFFD9822B);
-  static const Color error = Color(0xFFC75450);
+  // Dark Theme Surfaces & Neutrals (Navy-charcoal direction)
+  static const Color darkBackground = Color(0xFF141820); // Dark Navy Charcoal
+  static const Color darkSurface = Color(0xFF202630); // Slightly lighter navy
+  static const Color darkSurfaceVariant = Color(0xFF28303C); // Elevated surface
+  static const Color darkTextPrimary = Color(0xFFF4EFEA); // Warm Off-White
+  static const Color darkTextSecondary = Color(0xFF9BA5B1); // Muted warm gray
+  static const Color darkBorder = Color(0xFF333D4B); // Subtle slate gray
+
+  // Semantic Feedback Colors (Distinct & accessible)
+  static const Color success = Color(0xFF5D9B75); // Muted green
+  static const Color warning = Color(0xFFD98A32); // Soft ochre
+  static const Color error = Color(0xFFCC5A5A); // Gentle rose/red
+  static const Color info = Color(0xFF5B88A8); // Soft blue
+  static const Color favoriteStar = Color(
+    0xFFE8B84B,
+  ); // Harmonized golden amber
+
+  // Distinguishable Mood Colors (Preserving semantic recognition)
+  static const Color moodVeryHappy = Color(0xFFE8B84B); // Warm Golden Sunshine
+  static const Color moodHappy = Color(0xFF7CAE7A); // Gentle Sage Green
+  static const Color moodNeutral = Color(0xFF6B94B2); // Calm Soft Blue
+  static const Color moodSad = Color(0xFFD48277); // Gentle Rose/Coral
+  static const Color moodVerySad = Color(0xFF9A5252); // Muted Wine/Deep Rose
+
+  // Backwards compatibility aliases
+  static const Color dustyRose = primary;
+  static const Color dustyRoseLight = primaryContainer;
+  static const Color dustyRoseDark = primaryDark;
+  static const Color calmingSage = secondary;
+  static const Color calmingSageLight = secondaryContainer;
+  static const Color calmingSageDark = secondaryDark;
+  static const Color warmPeach = accent;
+  static const Color softCream = background;
+  static const Color warmSand = surfaceVariant;
+  static const Color lightBg = background;
+  static const Color lightSurface = surface;
+  static const Color lightSurfaceVariant = surfaceVariant;
+  static const Color lightTextPrimary = textPrimary;
+  static const Color lightTextSecondary = textSecondary;
+  static const Color lightBorder = border;
+  static const Color darkBg = darkBackground;
 }

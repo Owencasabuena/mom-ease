@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../core/services/storage_service.dart';
 import '../../mood/models/mood_type.dart';
 import '../data/journal_repository.dart';
@@ -28,24 +30,24 @@ class JournalDraft {
   bool get isEmpty => title.trim().isEmpty && content.trim().isEmpty;
 
   Map<String, dynamic> toMap() => {
-        'title': title,
-        'content': content,
-        'moodId': moodId,
-        'promptId': promptId,
-        'tags': tags,
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    'title': title,
+    'content': content,
+    'moodId': moodId,
+    'promptId': promptId,
+    'tags': tags,
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   factory JournalDraft.fromMap(Map<String, dynamic> map) => JournalDraft(
-        title: map['title'] as String? ?? '',
-        content: map['content'] as String? ?? '',
-        moodId: map['moodId'] as String?,
-        promptId: map['promptId'] as String?,
-        tags: List<String>.from(map['tags'] ?? []),
-        updatedAt: map['updatedAt'] != null
-            ? DateTime.tryParse(map['updatedAt'] as String) ?? DateTime.now()
-            : DateTime.now(),
-      );
+    title: map['title'] as String? ?? '',
+    content: map['content'] as String? ?? '',
+    moodId: map['moodId'] as String?,
+    promptId: map['promptId'] as String?,
+    tags: List<String>.from(map['tags'] ?? []),
+    updatedAt: map['updatedAt'] != null
+        ? DateTime.tryParse(map['updatedAt'] as String) ?? DateTime.now()
+        : DateTime.now(),
+  );
 
   String toJson() => jsonEncode(toMap());
 
@@ -98,8 +100,7 @@ class JournalService {
 
   Future<void> deleteEntry(String id) => _repository.deleteEntry(id);
 
-  Future<JournalEntry?> getEntryById(String id) =>
-      _repository.getEntryById(id);
+  Future<JournalEntry?> getEntryById(String id) => _repository.getEntryById(id);
 
   Future<List<JournalEntry>> getEntries() => _repository.getEntries(_userId);
 

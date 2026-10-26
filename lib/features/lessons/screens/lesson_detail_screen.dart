@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/lesson.dart';
 import '../providers/lesson_provider.dart';
 import '../widgets/key_takeaways_card.dart';
@@ -9,10 +10,7 @@ import '../widgets/lesson_video_section.dart';
 class LessonDetailScreen extends StatefulWidget {
   final Lesson lesson;
 
-  const LessonDetailScreen({
-    super.key,
-    required this.lesson,
-  });
+  const LessonDetailScreen({super.key, required this.lesson});
 
   @override
   State<LessonDetailScreen> createState() => _LessonDetailScreenState();
@@ -82,11 +80,14 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer
-                        .withValues(alpha: 0.6),
+                    color: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.6,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -130,10 +131,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
 
             // Optional Video Section
             if (lesson.hasVideo) ...[
-              LessonVideoSection(
-                videoUrl: lesson.videoUrl,
-                language: lang,
-              ),
+              LessonVideoSection(videoUrl: lesson.videoUrl, language: lang),
               const SizedBox(height: 20),
             ],
 
@@ -143,10 +141,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
 
             // Key Takeaways
             if (takeaways.isNotEmpty) ...[
-              KeyTakeawaysCard(
-                takeaways: takeaways,
-                language: lang,
-              ),
+              KeyTakeawaysCard(takeaways: takeaways, language: lang),
               const SizedBox(height: 24),
             ],
 
@@ -185,11 +180,11 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                     content: Text(
                       isCompleted
                           ? (isTl
-                              ? 'Inalis sa mga natapos'
-                              : 'Marked as uncompleted')
+                                ? 'Inalis sa mga natapos'
+                                : 'Marked as uncompleted')
                           : (isTl
-                              ? 'Nai-marka bilang natapos!'
-                              : 'Marked as completed!'),
+                                ? 'Nai-marka bilang natapos!'
+                                : 'Marked as completed!'),
                     ),
                     duration: const Duration(seconds: 2),
                     behavior: SnackBarBehavior.floating,
@@ -244,7 +239,8 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
         // not starting with a number or bullet
         final isNumbered = RegExp(r'^\d+[\.:\)]').hasMatch(trimmed);
         final isBullet = trimmed.startsWith('- ') || trimmed.startsWith('• ');
-        final isShortTitle = trimmed.length < 60 &&
+        final isShortTitle =
+            trimmed.length < 60 &&
             !trimmed.endsWith('.') &&
             !trimmed.contains(': ') &&
             !isNumbered &&
@@ -306,8 +302,9 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
         if (labeledMatch != null && labeledMatch.group(1)!.length < 50) {
           final label = labeledMatch.group(1)!;
           final rest = labeledMatch.group(2) ?? '';
-          final cleanLabel =
-              label.startsWith('- ') ? '• ${label.substring(2)}' : label;
+          final cleanLabel = label.startsWith('- ')
+              ? '• ${label.substring(2)}'
+              : label;
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 14),

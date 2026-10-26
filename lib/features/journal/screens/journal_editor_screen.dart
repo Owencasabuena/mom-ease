@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../lessons/providers/lesson_provider.dart';
 import '../../mood/models/mood_type.dart';
 import '../../mood/state/mood_provider.dart';
@@ -54,9 +56,8 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
   void initState() {
     super.initState();
 
-    _selectedDate = widget.existingEntry?.date ??
-        widget.initialDate ??
-        DateTime.now();
+    _selectedDate =
+        widget.existingEntry?.date ?? widget.initialDate ?? DateTime.now();
 
     _selectedMood = widget.existingEntry?.mood ?? widget.initialMood;
     _selectedTags = widget.existingEntry != null
@@ -98,8 +99,10 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
 
     // Check for unfinished draft (only if creating a new entry)
     if (widget.existingEntry == null) {
-      final journalProvider =
-          Provider.of<JournalProvider?>(context, listen: false);
+      final journalProvider = Provider.of<JournalProvider?>(
+        context,
+        listen: false,
+      );
       final draft = journalProvider?.savedDraft;
       if (draft != null && !draft.isEmpty && mounted) {
         _promptRestoreDraft(draft);
@@ -140,13 +143,15 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                 _contentController.text = draft.content;
                 if (draft.moodId != null) {
                   try {
-                    _selectedMood =
-                        MoodType.values.firstWhere((m) => m.name == draft.moodId);
+                    _selectedMood = MoodType.values.firstWhere(
+                      (m) => m.name == draft.moodId,
+                    );
                   } catch (_) {}
                 }
                 if (draft.promptId != null) {
-                  _selectedPrompt =
-                      JournalPromptService().getPromptById(draft.promptId!);
+                  _selectedPrompt = JournalPromptService().getPromptById(
+                    draft.promptId!,
+                  );
                 }
                 _selectedTags = List.from(draft.tags);
               });
@@ -188,7 +193,10 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     } else {
       _isVoiceUsed = true;
       final existingText = _contentController.text;
-      final lessonProvider = Provider.of<LessonProvider?>(context, listen: false);
+      final lessonProvider = Provider.of<LessonProvider?>(
+        context,
+        listen: false,
+      );
       final currentLang = lessonProvider?.currentLanguage ?? 'en';
       final langCode = currentLang == 'tl' ? 'fil' : 'en';
 
@@ -231,8 +239,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
     final now = DateTime.now();
 
     final entry = JournalEntry(
-      id: widget.existingEntry?.id ??
-          'entry_${now.millisecondsSinceEpoch}',
+      id: widget.existingEntry?.id ?? 'entry_${now.millisecondsSinceEpoch}',
       userId: widget.existingEntry?.userId ?? provider.userId,
       date: _selectedDate,
       title: title.isEmpty ? null : title,
@@ -304,16 +311,18 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
               child: FilledButton(
                 onPressed: (!hasContent || _isSaving) ? null : _saveEntry,
                 style: FilledButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                 ),
                 child: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: theme.colorScheme.onPrimary,
                         ),
                       )
                     : const Text(
@@ -397,8 +406,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.secondaryContainer
-                      .withValues(alpha: 0.35),
+                  color: theme.colorScheme.secondaryContainer.withValues(
+                    alpha: 0.35,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: theme.colorScheme.secondary.withValues(alpha: 0.3),
@@ -492,25 +502,30 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
               decoration: InputDecoration(
                 hintText: 'Title (optional)',
                 hintStyle: TextStyle(
-                  color:
-                      theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.6,
+                  ),
                 ),
                 filled: true,
                 fillColor: theme.colorScheme.surfaceContainerLow,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color:
-                        theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.4,
+                    ),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color:
-                        theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.4,
+                    ),
                   ),
                 ),
               ),
@@ -533,8 +548,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                     border: Border.all(
                       color: isListening
                           ? theme.colorScheme.error
-                          : theme.colorScheme.outlineVariant
-                              .withValues(alpha: 0.4),
+                          : theme.colorScheme.outlineVariant.withValues(
+                              alpha: 0.4,
+                            ),
                       width: isListening ? 1.5 : 1,
                     ),
                   ),
@@ -552,8 +568,12 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                                 .withValues(alpha: 0.6),
                           ),
                           border: InputBorder.none,
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          contentPadding: const EdgeInsets.fromLTRB(
+                            16,
+                            16,
+                            16,
+                            8,
+                          ),
                         ),
                         textCapitalization: TextCapitalization.sentences,
                       ),
@@ -590,8 +610,10 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                                     foregroundColor: theme.colorScheme.onError,
                                     minimumSize: const Size(40, 40),
                                   ),
-                                  icon: const Icon(Icons.stop_rounded,
-                                      size: 20),
+                                  icon: const Icon(
+                                    Icons.stop_rounded,
+                                    size: 20,
+                                  ),
                                   tooltip: 'Stop voice input',
                                 ),
                               ),
@@ -599,8 +621,9 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                               const SizedBox(
                                 width: 14,
                                 height: 14,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -612,8 +635,11 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                               const Spacer(),
                             ] else if (_speechService.status ==
                                 SpeechStatus.permissionDenied) ...[
-                              Icon(Icons.mic_off_rounded,
-                                  size: 16, color: theme.colorScheme.error),
+                              Icon(
+                                Icons.mic_off_rounded,
+                                size: 16,
+                                color: theme.colorScheme.error,
+                              ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
@@ -633,8 +659,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> {
                                   style: IconButton.styleFrom(
                                     minimumSize: const Size(40, 40),
                                   ),
-                                  icon: const Icon(Icons.mic_rounded,
-                                      size: 20),
+                                  icon: const Icon(Icons.mic_rounded, size: 20),
                                   tooltip: 'Start voice input',
                                 ),
                               ),

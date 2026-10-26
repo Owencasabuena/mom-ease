@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../../mood/models/mood_type.dart';
 import '../models/journal_entry.dart';
 import '../models/journal_prompt.dart';
@@ -28,10 +29,8 @@ class JournalProvider extends ChangeNotifier {
   bool _isLockEnabled = false;
   bool _isUnlocked = false;
 
-  JournalProvider(
-    this._journalService, [
-    JournalPromptService? promptService,
-  ]) : _promptService = promptService ?? JournalPromptService();
+  JournalProvider(this._journalService, [JournalPromptService? promptService])
+    : _promptService = promptService ?? JournalPromptService();
 
   // ── Getters ──────────────────────────────────────────────────────────────
 
@@ -65,9 +64,7 @@ class JournalProvider extends ChangeNotifier {
   bool get hasActiveTypeFilters => activeTypeFilterCount > 0;
 
   bool get hasActiveFilters =>
-      hasActiveTypeFilters ||
-      _filterDate != null ||
-      _searchQuery.isNotEmpty;
+      hasActiveTypeFilters || _filterDate != null || _searchQuery.isNotEmpty;
 
   /// Returns whether a prompt has been answered in this journal.
   bool hasAnsweredPrompt(String? promptId) {
@@ -185,12 +182,13 @@ class JournalProvider extends ChangeNotifier {
       final targetUserId = _journalService.userId;
       final resolvedEntry =
           (entry.userId.isEmpty || entry.userId == 'local_user')
-              ? entry.copyWith(userId: targetUserId)
-              : entry;
+          ? entry.copyWith(userId: targetUserId)
+          : entry;
 
       // Check if entry already exists (update vs create)
-      final existingIndex =
-          _entries.indexWhere((e) => e.id == resolvedEntry.id);
+      final existingIndex = _entries.indexWhere(
+        (e) => e.id == resolvedEntry.id,
+      );
       if (existingIndex >= 0) {
         await _journalService.updateEntry(resolvedEntry);
         _entries[existingIndex] = resolvedEntry;

@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import '../models/lesson.dart';
 
 /// Recommends supportive postpartum lessons based on current or recent mood.
@@ -41,14 +42,16 @@ class LessonRecommendationService {
     }
 
     // 2. Prefer lessons not yet completed
-    final uncompleted =
-        matches.where((l) => !completedIds.contains(l.id)).toList();
+    final uncompleted = matches
+        .where((l) => !completedIds.contains(l.id))
+        .toList();
 
     final pool = uncompleted.isNotEmpty ? uncompleted : matches;
 
     // 3. Prefer lessons not just opened
-    final freshPool =
-        pool.where((l) => lastOpenedId == null || l.id != lastOpenedId).toList();
+    final freshPool = pool
+        .where((l) => lastOpenedId == null || l.id != lastOpenedId)
+        .toList();
 
     final finalPool = freshPool.isNotEmpty ? freshPool : pool;
 

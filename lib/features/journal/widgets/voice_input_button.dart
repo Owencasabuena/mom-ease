@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../services/speech_service.dart';
 
 /// Ergonomic, accessible microphone button for speech-to-text journaling.
@@ -29,12 +30,12 @@ class VoiceInputButton extends StatelessWidget {
     switch (status) {
       case SpeechStatus.listening:
         buttonColor = theme.colorScheme.error;
-        iconColor = Colors.white;
+        iconColor = theme.colorScheme.onError;
         icon = Icons.stop_rounded;
         break;
       case SpeechStatus.processing:
         buttonColor = theme.colorScheme.tertiary;
-        iconColor = Colors.white;
+        iconColor = theme.colorScheme.onTertiary;
         icon = Icons.hourglass_top_rounded;
         break;
       case SpeechStatus.permissionDenied:
@@ -49,7 +50,7 @@ class VoiceInputButton extends StatelessWidget {
         break;
       case SpeechStatus.idle:
         buttonColor = theme.colorScheme.primaryContainer;
-        iconColor = theme.colorScheme.primary;
+        iconColor = theme.colorScheme.onPrimaryContainer;
         icon = Icons.mic_rounded;
         break;
     }
@@ -72,19 +73,15 @@ class VoiceInputButton extends StatelessWidget {
                 height: 64,
                 alignment: Alignment.center,
                 child: isProcessing
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 28,
                         height: 28,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          color: Colors.white,
+                          color: theme.colorScheme.onTertiary,
                         ),
                       )
-                    : Icon(
-                        icon,
-                        size: 32,
-                        color: iconColor,
-                      ),
+                    : Icon(icon, size: 32, color: iconColor),
               ),
             ),
           ),

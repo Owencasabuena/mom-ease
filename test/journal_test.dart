@@ -70,7 +70,10 @@ class _FakeJournalRepository implements JournalRepository {
   }
 
   @override
-  Future<List<JournalEntry>> getEntriesForDate(String userId, DateTime date) async {
+  Future<List<JournalEntry>> getEntriesForDate(
+    String userId,
+    DateTime date,
+  ) async {
     return _entries.values.where((e) {
       return _matchesUser(e.userId, userId) &&
           e.date.year == date.year &&
@@ -80,15 +83,23 @@ class _FakeJournalRepository implements JournalRepository {
   }
 
   @override
-  Future<List<JournalEntry>> getEntriesForMonth(String userId, int year, int month) async {
+  Future<List<JournalEntry>> getEntriesForMonth(
+    String userId,
+    int year,
+    int month,
+  ) async {
     return _entries.values.where((e) {
-      return _matchesUser(e.userId, userId) && e.date.year == year && e.date.month == month;
+      return _matchesUser(e.userId, userId) &&
+          e.date.year == year &&
+          e.date.month == month;
     }).toList();
   }
 
   @override
   Future<List<JournalEntry>> getFavoriteEntries(String userId) async {
-    return _entries.values.where((e) => _matchesUser(e.userId, userId) && e.isFavorite).toList();
+    return _entries.values
+        .where((e) => _matchesUser(e.userId, userId) && e.isFavorite)
+        .toList();
   }
 
   @override
@@ -224,12 +235,14 @@ void main() {
           expect(
             enLower.contains(banned),
             isFalse,
-            reason: 'Prompt "${p.textEn}" contains banned clinical term "$banned"',
+            reason:
+                'Prompt "${p.textEn}" contains banned clinical term "$banned"',
           );
           expect(
             tlLower.contains(banned),
             isFalse,
-            reason: 'Tagalog prompt "${p.textTl}" contains banned clinical term "$banned"',
+            reason:
+                'Tagalog prompt "${p.textTl}" contains banned clinical term "$banned"',
           );
         }
       }
@@ -281,7 +294,10 @@ void main() {
 
       final forDay = await service.getEntriesForDate(date);
       expect(forDay.length, equals(2));
-      expect(forDay.map((e) => e.id), containsAll(['entry_morning', 'entry_evening']));
+      expect(
+        forDay.map((e) => e.id),
+        containsAll(['entry_morning', 'entry_evening']),
+      );
     });
 
     test('Search finds entries by title, text content, and tags', () async {
@@ -346,30 +362,33 @@ void main() {
       expect(cleared, isNull);
     });
 
-    test('Export utilities generate structured JSON and readable Plain Text', () async {
-      final repo = _FakeJournalRepository();
-      final service = JournalService(repo, 'user_sarah');
+    test(
+      'Export utilities generate structured JSON and readable Plain Text',
+      () async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'user_sarah');
 
-      final entry = JournalEntry(
-        id: 'export_test',
-        userId: 'user_sarah',
-        date: DateTime(2026, 10, 25, 10, 0),
-        title: 'First Smile',
-        content: 'Baby smiled at me this morning!',
-        moodId: 'veryHappy',
-        tags: ['Baby', 'Milestone'],
-        createdAt: DateTime(2026, 10, 25, 10, 0),
-        updatedAt: DateTime(2026, 10, 25, 10, 0),
-      );
+        final entry = JournalEntry(
+          id: 'export_test',
+          userId: 'user_sarah',
+          date: DateTime(2026, 10, 25, 10, 0),
+          title: 'First Smile',
+          content: 'Baby smiled at me this morning!',
+          moodId: 'veryHappy',
+          tags: ['Baby', 'Milestone'],
+          createdAt: DateTime(2026, 10, 25, 10, 0),
+          updatedAt: DateTime(2026, 10, 25, 10, 0),
+        );
 
-      final jsonExport = service.exportAsJson([entry]);
-      expect(jsonExport, contains('First Smile'));
-      expect(jsonExport, contains('veryHappy'));
+        final jsonExport = service.exportAsJson([entry]);
+        expect(jsonExport, contains('First Smile'));
+        expect(jsonExport, contains('veryHappy'));
 
-      final textExport = service.exportAsPlainText([entry]);
-      expect(textExport, contains('Mood: Very Happy'));
-      expect(textExport, contains('Baby smiled at me this morning!'));
-    });
+        final textExport = service.exportAsPlainText([entry]);
+        expect(textExport, contains('Mood: Very Happy'));
+        expect(textExport, contains('Baby smiled at me this morning!'));
+      },
+    );
   });
 
   group('4. JournalProvider State Management Tests', () {
@@ -470,7 +489,9 @@ void main() {
   });
 
   group('6. Journal Widget Component Tests', () {
-    testWidgets('PromptCard renders daily reflection question and actions', (tester) async {
+    testWidgets('PromptCard renders daily reflection question and actions', (
+      tester,
+    ) async {
       bool answered = false;
       bool refreshed = false;
       final prompt = kDefaultJournalPrompts.first;
@@ -499,86 +520,100 @@ void main() {
       expect(refreshed, isTrue);
     });
 
-    testWidgets('JournalEmptyState renders maternal supportive invitation and single New Entry CTA', (tester) async {
-      bool newEntryTapped = false;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: JournalEmptyState(
-              onNewEntry: () => newEntryTapped = true,
+    testWidgets(
+      'JournalEmptyState renders maternal supportive invitation and single New Entry CTA',
+      (tester) async {
+        bool newEntryTapped = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: JournalEmptyState(onNewEntry: () => newEntryTapped = true),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Your journal is ready when you are.'), findsOneWidget);
-      expect(
-        find.text('Write a few words or speak your thoughts.'),
-        findsOneWidget,
-      );
-      expect(find.text('New Entry'), findsOneWidget);
+        expect(
+          find.text('Your journal is ready when you are.'),
+          findsOneWidget,
+        );
+        expect(
+          find.text('Write a few words or speak your thoughts.'),
+          findsOneWidget,
+        );
+        expect(find.text('New Entry'), findsOneWidget);
 
-      await tester.tap(find.text('New Entry'));
-      expect(newEntryTapped, isTrue);
-    });
+        await tester.tap(find.text('New Entry'));
+        expect(newEntryTapped, isTrue);
+      },
+    );
 
-    testWidgets('JournalEntryCard displays mood badge, content snippet, and tags', (tester) async {
-      final entry = JournalEntry(
-        id: 'test_card',
-        userId: 'sarah',
-        date: DateTime.now(),
-        title: 'Calm evening',
-        content: 'Baby slept peacefully after her warm bath.',
-        moodId: 'happy',
-        tags: ['Baby', 'Sleep'],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        isFavorite: true,
-      );
+    testWidgets(
+      'JournalEntryCard displays mood badge, content snippet, and tags',
+      (tester) async {
+        final entry = JournalEntry(
+          id: 'test_card',
+          userId: 'sarah',
+          date: DateTime.now(),
+          title: 'Calm evening',
+          content: 'Baby slept peacefully after her warm bath.',
+          moodId: 'happy',
+          tags: ['Baby', 'Sleep'],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          isFavorite: true,
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: JournalEntryCard(
-              entry: entry,
-              onTap: () {},
-              onFavoriteToggle: () {},
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: JournalEntryCard(
+                entry: entry,
+                onTap: () {},
+                onFavoriteToggle: () {},
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Calm evening'), findsOneWidget);
-      expect(find.text('Baby slept peacefully after her warm bath.'), findsOneWidget);
-      expect(find.text('#Baby'), findsOneWidget);
-      expect(find.text('#Sleep'), findsOneWidget);
-      expect(find.byIcon(Icons.star_rounded), findsOneWidget);
-    });
+        expect(find.text('Calm evening'), findsOneWidget);
+        expect(
+          find.text('Baby slept peacefully after her warm bath.'),
+          findsOneWidget,
+        );
+        expect(find.text('#Baby'), findsOneWidget);
+        expect(find.text('#Sleep'), findsOneWidget);
+        expect(find.byIcon(Icons.star_rounded), findsOneWidget);
+      },
+    );
 
-    testWidgets('JournalScreen renders header and single empty state CTA without redundant duplicate buttons', (tester) async {
-      final repo = _FakeJournalRepository();
-      final service = JournalService(repo, 'user_sarah');
-      final provider = JournalProvider(service);
-      await provider.init();
+    testWidgets(
+      'JournalScreen renders header and single empty state CTA without redundant duplicate buttons',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'user_sarah');
+        final provider = JournalProvider(service);
+        await provider.init();
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider<JournalProvider>.value(
-          value: provider,
-          child: const MaterialApp(
-            home: JournalScreen(),
+        await tester.pumpWidget(
+          ChangeNotifierProvider<JournalProvider>.value(
+            value: provider,
+            child: const MaterialApp(home: JournalScreen()),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('My Journal'), findsOneWidget);
-      expect(find.text('A private space for your thoughts and moments.'), findsOneWidget);
-      // Confirms redundant top card is removed
-      expect(find.text('How are you feeling today?'), findsNothing);
-      expect(find.text('Recent Entries'), findsOneWidget);
-      // Empty state contains the single primary New Entry button
-      expect(find.text('New Entry'), findsOneWidget);
-    });
+        expect(find.text('My Journal'), findsOneWidget);
+        expect(
+          find.text('A private space for your thoughts and moments.'),
+          findsOneWidget,
+        );
+        // Confirms redundant top card is removed
+        expect(find.text('How are you feeling today?'), findsNothing);
+        expect(find.text('Recent Entries'), findsOneWidget);
+        // Empty state contains the single primary New Entry button
+        expect(find.text('New Entry'), findsOneWidget);
+      },
+    );
 
     test('Journal entry persists and does not disappear on reload when saved with local_user or specific user ID', () async {
       final repo = _FakeJournalRepository();
@@ -599,271 +634,294 @@ void main() {
       final saved = await provider.saveEntry(entry);
       expect(saved, isTrue);
       expect(provider.allEntries.length, 1);
-      expect(provider.allEntries.first.content, 'I had a quiet evening with baby.');
+      expect(
+        provider.allEntries.first.content,
+        'I had a quiet evening with baby.',
+      );
 
       // Simulate a reload or refresh
       await provider.reloadEntries();
 
       // Must NOT disappear
       expect(provider.allEntries.length, 1);
-      expect(provider.allEntries.first.content, 'I had a quiet evening with baby.');
+      expect(
+        provider.allEntries.first.content,
+        'I had a quiet evening with baby.',
+      );
       expect(provider.allEntries.first.userId, 'local_1740000000');
     });
 
-    testWidgets('PromptCard progressive disclosure renders compact completed state without overflow', (tester) async {
-      bool viewTapped = false;
-      final prompt = kDefaultJournalPrompts.first;
+    testWidgets(
+      'PromptCard progressive disclosure renders compact completed state without overflow',
+      (tester) async {
+        bool viewTapped = false;
+        final prompt = kDefaultJournalPrompts.first;
 
-      // Simulate a narrow mobile device (320px)
-      tester.view.physicalSize = const Size(320 * 2.0, 600 * 2.0);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+        // Simulate a narrow mobile device (320px)
+        tester.view.physicalSize = const Size(320 * 2.0, 600 * 2.0);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: PromptCard(
-              prompt: prompt,
-              language: 'en',
-              isCompleted: true,
-              onUsePrompt: () {},
-              onNextPrompt: () {},
-              onViewEntry: () => viewTapped = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: PromptCard(
+                prompt: prompt,
+                language: 'en',
+                isCompleted: true,
+                onUsePrompt: () {},
+                onNextPrompt: () {},
+                onViewEntry: () => viewTapped = true,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Daily Reflection • Completed today'), findsOneWidget);
-      expect(find.text('View'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+        expect(find.text('Daily Reflection • Completed today'), findsOneWidget);
+        expect(find.text('View'), findsOneWidget);
+        expect(tester.takeException(), isNull);
 
-      await tester.tap(find.text('View'));
-      expect(viewTapped, isTrue);
-    });
+        await tester.tap(find.text('View'));
+        expect(viewTapped, isTrue);
+      },
+    );
 
-    testWidgets('JournalMoodSelector renders emoji-only options cleanly without checkmarks or text clutter', (tester) async {
-      MoodType? selected;
+    testWidgets(
+      'JournalMoodSelector renders emoji-only options cleanly without checkmarks or text clutter',
+      (tester) async {
+        MoodType? selected;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (context, setState) {
-                return JournalMoodSelector(
-                  selectedMood: selected,
-                  onMoodSelected: (m) => setState(() => selected = m),
-                );
-              },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return JournalMoodSelector(
+                    selectedMood: selected,
+                    onMoodSelected: (m) => setState(() => selected = m),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Verify no checkmarks are present
-      expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+        // Verify no checkmarks are present
+        expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
 
-      // Verify text labels are removed (only emoji/icon displayed)
-      expect(find.text('None'), findsNothing);
-      expect(find.text('Very Happy'), findsNothing);
-      expect(find.text('Happy'), findsNothing);
-      expect(find.text('Okay'), findsNothing);
-      expect(find.text('Sad'), findsNothing);
-      expect(find.text('Very Sad'), findsNothing);
+        // Verify text labels are removed (only emoji/icon displayed)
+        expect(find.text('None'), findsNothing);
+        expect(find.text('Very Happy'), findsNothing);
+        expect(find.text('Happy'), findsNothing);
+        expect(find.text('Okay'), findsNothing);
+        expect(find.text('Sad'), findsNothing);
+        expect(find.text('Very Sad'), findsNothing);
 
-      // Verify selection by tapping tooltip
-      await tester.tap(find.byTooltip('Very Happy'));
-      await tester.pumpAndSettle();
-      expect(selected, MoodType.veryHappy);
+        // Verify selection by tapping tooltip
+        await tester.tap(find.byTooltip('Very Happy'));
+        await tester.pumpAndSettle();
+        expect(selected, MoodType.veryHappy);
 
-      // Still no checkmark even when selected
-      expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+        // Still no checkmark even when selected
+        expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
 
-      // Tapping the selected mood again deselects it
-      await tester.tap(find.byTooltip('Very Happy'));
-      await tester.pumpAndSettle();
-      expect(selected, isNull);
-    });
+        // Tapping the selected mood again deselects it
+        await tester.tap(find.byTooltip('Very Happy'));
+        await tester.pumpAndSettle();
+        expect(selected, isNull);
+      },
+    );
 
-    testWidgets('JournalFilterSheet provides Favorites, Mood, Tags, Reset, Apply without Date selector', (tester) async {
-      final repo = _FakeJournalRepository();
-      final service = JournalService(repo, 'user_filters');
-      final provider = JournalProvider(service);
-      await provider.init();
+    testWidgets(
+      'JournalFilterSheet provides Favorites, Mood, Tags, Reset, Apply without Date selector',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'user_filters');
+        final provider = JournalProvider(service);
+        await provider.init();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: JournalFilterSheet(provider: provider),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: JournalFilterSheet(provider: provider)),
           ),
-        ),
-      );
+        );
 
-      // Verify Favorites switch is present
-      expect(find.text('Favorites Only'), findsOneWidget);
+        // Verify Favorites switch is present
+        expect(find.text('Favorites Only'), findsOneWidget);
 
-      // Verify Mood chips are present
-      expect(find.text('All Moods'), findsOneWidget);
-      expect(find.text('By Mood'), findsOneWidget);
+        // Verify Mood chips are present
+        expect(find.text('All Moods'), findsOneWidget);
+        expect(find.text('By Mood'), findsOneWidget);
 
-      // Verify Tags section is present
-      expect(find.text('By Tags'), findsOneWidget);
+        // Verify Tags section is present
+        expect(find.text('By Tags'), findsOneWidget);
 
-      // Verify Date selector was removed from filter sheet per requirements
-      expect(find.text('By Date'), findsNothing);
-      expect(find.text('Select a date'), findsNothing);
+        // Verify Date selector was removed from filter sheet per requirements
+        expect(find.text('By Date'), findsNothing);
+        expect(find.text('Select a date'), findsNothing);
 
-      // Verify single Reset button and Apply Filters button (no redundant top Reset)
-      expect(find.text('Reset'), findsOneWidget);
-      expect(find.text('Apply Filters'), findsOneWidget);
+        // Verify single Reset button and Apply Filters button (no redundant top Reset)
+        expect(find.text('Reset'), findsOneWidget);
+        expect(find.text('Apply Filters'), findsOneWidget);
 
-      // Verify mood chips are emoji-only without text labels
-      expect(find.text('Very Happy'), findsNothing);
-      expect(find.text('Happy'), findsNothing);
+        // Verify mood chips are emoji-only without text labels
+        expect(find.text('Very Happy'), findsNothing);
+        expect(find.text('Happy'), findsNothing);
 
-      // Verify choice chips under By Mood have showCheckmark: false
-      final moodChips = tester.widgetList<ChoiceChip>(find.byType(ChoiceChip)).take(6);
-      expect(moodChips.length, 6);
-      for (final chip in moodChips) {
-        expect(chip.showCheckmark, isFalse);
-      }
-    });
+        // Verify choice chips under By Mood have showCheckmark: false
+        final moodChips = tester
+            .widgetList<ChoiceChip>(find.byType(ChoiceChip))
+            .take(6);
+        expect(moodChips.length, 6);
+        for (final chip in moodChips) {
+          expect(chip.showCheckmark, isFalse);
+        }
+      },
+    );
 
-    testWidgets('JournalCalendarSheet renders current month, dots on entry dates, and selects date', (tester) async {
-      final repo = _FakeJournalRepository();
-      final now = DateTime.now();
-      await repo.createEntry(JournalEntry(
-        id: 'cal_entry_1',
-        userId: 'cal_user',
-        date: now,
-        content: 'Entry for today',
-        moodId: 'happy',
-        createdAt: now,
-        updatedAt: now,
-      ));
-
-      final service = JournalService(repo, 'cal_user');
-      final provider = JournalProvider(service);
-      await provider.init();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: JournalCalendarSheet(provider: provider),
+    testWidgets(
+      'JournalCalendarSheet renders current month, dots on entry dates, and selects date',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final now = DateTime.now();
+        await repo.createEntry(
+          JournalEntry(
+            id: 'cal_entry_1',
+            userId: 'cal_user',
+            date: now,
+            content: 'Entry for today',
+            moodId: 'happy',
+            createdAt: now,
+            updatedAt: now,
           ),
-        ),
-      );
+        );
 
-      // Verify month / year header
-      final monthName = DateFormat('MMMM yyyy').format(now);
-      expect(find.text(monthName), findsOneWidget);
+        final service = JournalService(repo, 'cal_user');
+        final provider = JournalProvider(service);
+        await provider.init();
 
-      // Verify today is displayed in the calendar
-      expect(find.text('${now.day}'), findsWidgets);
-
-      // Tap on today to select
-      await tester.tap(find.text('${now.day}').first);
-      expect(provider.filterDate?.day, now.day);
-    });
-
-    testWidgets('JournalScreen renders active filter chips and dynamic header titles', (tester) async {
-      final repo = _FakeJournalRepository();
-      final service = JournalService(repo, 'chips_user');
-      final provider = JournalProvider(service);
-      await provider.init();
-
-      // Set a date filter
-      final today = DateTime.now();
-      provider.setFilterDate(today);
-
-      await tester.pumpWidget(
-        ChangeNotifierProvider<JournalProvider>.value(
-          value: provider,
-          child: const MaterialApp(
-            home: JournalScreen(),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: JournalCalendarSheet(provider: provider)),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
 
-      // Verify dynamic header reflects date
-      final dateLabel = 'Entries for ${DateFormat('MMMM d').format(today)}';
-      expect(find.text(dateLabel), findsOneWidget);
+        // Verify month / year header
+        final monthName = DateFormat('MMMM yyyy').format(now);
+        expect(find.text(monthName), findsOneWidget);
 
-      // Verify active date chip is rendered
-      final chipLabel = DateFormat('MMM d').format(today);
-      expect(find.text(chipLabel), findsOneWidget);
+        // Verify today is displayed in the calendar
+        expect(find.text('${now.day}'), findsWidgets);
 
-      // Tap X to delete active date chip
-      await tester.tap(find.byIcon(Icons.close_rounded).first);
-      await tester.pumpAndSettle();
-      expect(provider.filterDate, isNull);
-    });
+        // Tap on today to select
+        await tester.tap(find.text('${now.day}').first);
+        expect(provider.filterDate?.day, now.day);
+      },
+    );
 
-    testWidgets('VoiceInputButton shows mic when idle and square stop icon when listening', (tester) async {
-      final speechService = SpeechService();
-      bool pressed = false;
+    testWidgets(
+      'JournalScreen renders active filter chips and dynamic header titles',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'chips_user');
+        final provider = JournalProvider(service);
+        await provider.init();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: VoiceInputButton(
-              speechService: speechService,
-              onPressed: () => pressed = true,
+        // Set a date filter
+        final today = DateTime.now();
+        provider.setFilterDate(today);
+
+        await tester.pumpWidget(
+          ChangeNotifierProvider<JournalProvider>.value(
+            value: provider,
+            child: const MaterialApp(home: JournalScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify dynamic header reflects date
+        final dateLabel = 'Entries for ${DateFormat('MMMM d').format(today)}';
+        expect(find.text(dateLabel), findsOneWidget);
+
+        // Verify active date chip is rendered
+        final chipLabel = DateFormat('MMM d').format(today);
+        expect(find.text(chipLabel), findsOneWidget);
+
+        // Tap X to delete active date chip
+        await tester.tap(find.byIcon(Icons.close_rounded).first);
+        await tester.pumpAndSettle();
+        expect(provider.filterDate, isNull);
+      },
+    );
+
+    testWidgets(
+      'VoiceInputButton shows mic when idle and square stop icon when listening',
+      (tester) async {
+        final speechService = SpeechService();
+        bool pressed = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: VoiceInputButton(
+                speechService: speechService,
+                onPressed: () => pressed = true,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Idle shows mic
-      expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.stop_rounded), findsNothing);
-      expect(find.textContaining('🎙'), findsNothing);
+        // Idle shows mic
+        expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.stop_rounded), findsNothing);
+        expect(find.textContaining('🎙'), findsNothing);
 
-      await tester.tap(find.byType(VoiceInputButton));
-      expect(pressed, isTrue);
-    });
+        await tester.tap(find.byType(VoiceInputButton));
+        expect(pressed, isTrue);
+      },
+    );
 
-    testWidgets('JournalDetailScreen renders edited entry metadata without overflow', (tester) async {
-      final repo = _FakeJournalRepository();
-      final service = JournalService(repo, 'detail_user');
-      final provider = JournalProvider(service);
-      await provider.init();
+    testWidgets(
+      'JournalDetailScreen renders edited entry metadata without overflow',
+      (tester) async {
+        final repo = _FakeJournalRepository();
+        final service = JournalService(repo, 'detail_user');
+        final provider = JournalProvider(service);
+        await provider.init();
 
-      final created = DateTime(2026, 10, 26, 8, 45);
-      final edited = DateTime(2026, 10, 26, 11, 16);
-      final entry = JournalEntry(
-        id: 'test_entry',
-        userId: 'detail_user',
-        date: created,
-        content: 'hello hello i am owen i\'m tired',
-        moodId: 'veryHappy',
-        inputMethod: JournalInputMethod.mixed,
-        createdAt: created,
-        updatedAt: edited,
-      );
+        final created = DateTime(2026, 10, 26, 8, 45);
+        final edited = DateTime(2026, 10, 26, 11, 16);
+        final entry = JournalEntry(
+          id: 'test_entry',
+          userId: 'detail_user',
+          date: created,
+          content: 'hello hello i am owen i\'m tired',
+          moodId: 'veryHappy',
+          inputMethod: JournalInputMethod.mixed,
+          createdAt: created,
+          updatedAt: edited,
+        );
 
-      await service.createEntry(entry);
-      await provider.init();
+        await service.createEntry(entry);
+        await provider.init();
 
-      // Test with small mobile viewport width (340px)
-      tester.view.physicalSize = const Size(340 * 2.0, 700 * 2.0);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+        // Test with small mobile viewport width (340px)
+        tester.view.physicalSize = const Size(340 * 2.0, 700 * 2.0);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider<JournalProvider>.value(
-          value: provider,
-          child: MaterialApp(
-            home: JournalDetailScreen(entry: entry),
+        await tester.pumpWidget(
+          ChangeNotifierProvider<JournalProvider>.value(
+            value: provider,
+            child: MaterialApp(home: JournalDetailScreen(entry: entry)),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.textContaining('Created Oct 26, 2026'), findsOneWidget);
-      expect(find.textContaining('Edited Oct 26, 2026'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+        expect(find.textContaining('Created Oct 26, 2026'), findsOneWidget);
+        expect(find.textContaining('Edited Oct 26, 2026'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../../mood/models/mood_type.dart';
 import '../providers/journal_provider.dart';
 
@@ -8,10 +9,7 @@ import '../providers/journal_provider.dart';
 class JournalCalendarSheet extends StatefulWidget {
   final JournalProvider provider;
 
-  const JournalCalendarSheet({
-    super.key,
-    required this.provider,
-  });
+  const JournalCalendarSheet({super.key, required this.provider});
 
   static Future<void> show(BuildContext context, JournalProvider provider) {
     return showModalBottomSheet(
@@ -70,10 +68,14 @@ class _JournalCalendarSheetState extends State<JournalCalendarSheet> {
     final entryMoods = widget.provider.entryDatesWithMood;
 
     // Calendar calculations
-    final daysInMonth =
-        DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
+    final daysInMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month + 1,
+      0,
+    ).day;
     final firstWeekday =
-        DateTime(_currentMonth.year, _currentMonth.month, 1).weekday % 7; // Sunday = 0
+        DateTime(_currentMonth.year, _currentMonth.month, 1).weekday %
+        7; // Sunday = 0
 
     final totalGridCells = firstWeekday + daysInMonth;
     final rowCount = (totalGridCells / 7).ceil();
@@ -113,7 +115,7 @@ class _JournalCalendarSheetState extends State<JournalCalendarSheet> {
             // Weekday labels
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) {
+              children: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) {
                 return Expanded(
                   child: Center(
                     child: Text(
@@ -121,7 +123,9 @@ class _JournalCalendarSheetState extends State<JournalCalendarSheet> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey,
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.75,
+                        ),
                       ),
                     ),
                   ),
@@ -156,7 +160,8 @@ class _JournalCalendarSheetState extends State<JournalCalendarSheet> {
                     return Expanded(
                       child: Semantics(
                         button: true,
-                        label: '${DateFormat('MMMM d').format(cellDate)}${hasEntry ? ', has journal entry' : ''}',
+                        label:
+                            '${DateFormat('MMMM d').format(cellDate)}${hasEntry ? ', has journal entry' : ''}',
                         selected: isSelectedDate,
                         child: InkWell(
                           onTap: () {
@@ -192,9 +197,9 @@ class _JournalCalendarSheetState extends State<JournalCalendarSheet> {
                                     color: isSelectedDate
                                         ? theme.colorScheme.onPrimary
                                         : (cellDate.isAfter(today)
-                                            ? theme.colorScheme.onSurface
-                                                .withValues(alpha: 0.4)
-                                            : theme.colorScheme.onSurface),
+                                              ? theme.colorScheme.onSurface
+                                                    .withValues(alpha: 0.4)
+                                              : theme.colorScheme.onSurface),
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -208,7 +213,7 @@ class _JournalCalendarSheetState extends State<JournalCalendarSheet> {
                                       color: isSelectedDate
                                           ? theme.colorScheme.onPrimary
                                           : (mood?.color ??
-                                              theme.colorScheme.primary),
+                                                theme.colorScheme.primary),
                                     ),
                                   )
                                 else

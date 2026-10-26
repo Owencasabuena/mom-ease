@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../models/mood_type.dart';
 import '../state/mood_provider.dart';
 import 'mood_statistics.dart';
@@ -59,17 +60,22 @@ class _CalendarViewState extends State<CalendarView> {
                         borderRadius: BorderRadius.circular(14),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 DateFormat('MMMM yyyy').format(
                                   DateTime(
-                                      mood.displayedYear, mood.displayedMonth),
+                                    mood.displayedYear,
+                                    mood.displayedMonth,
+                                  ),
                                 ),
-                                style: theme.textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(width: 4),
                               Icon(
@@ -82,7 +88,9 @@ class _CalendarViewState extends State<CalendarView> {
                                 const SizedBox(width: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: theme.colorScheme.secondaryContainer,
                                     borderRadius: BorderRadius.circular(10),
@@ -91,10 +99,10 @@ class _CalendarViewState extends State<CalendarView> {
                                     totalCheckIns == 1
                                         ? '1 check-in'
                                         : '$totalCheckIns check-ins',
-                                    style:
-                                        theme.textTheme.labelSmall?.copyWith(
+                                    style: theme.textTheme.labelSmall?.copyWith(
                                       color: theme
-                                          .colorScheme.onSecondaryContainer,
+                                          .colorScheme
+                                          .onSecondaryContainer,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 10,
                                     ),
@@ -223,16 +231,19 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
     if (!_scroll.hasClients) return;
     final days = _buildDays();
     final selected = widget.mood.selectedDate;
-    final index = days.indexWhere((d) =>
-        d.year == selected.year &&
-        d.month == selected.month &&
-        d.day == selected.day);
+    final index = days.indexWhere(
+      (d) =>
+          d.year == selected.year &&
+          d.month == selected.month &&
+          d.day == selected.day,
+    );
     if (index < 0) return;
 
     const totalItemWidth = 66.0;
     const listPadding = 8.0;
     final viewportWidth = _scroll.position.viewportDimension;
-    final targetOffset = (index * totalItemWidth) +
+    final targetOffset =
+        (index * totalItemWidth) +
         listPadding -
         (viewportWidth / 2) +
         (totalItemWidth / 2);
@@ -247,18 +258,20 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
   List<DateTime> _buildDays() {
     final today = DateTime.now();
     final todayNorm = DateTime(today.year, today.month, today.day);
-    final selectedNorm = DateTime(widget.mood.selectedDate.year,
-        widget.mood.selectedDate.month, widget.mood.selectedDate.day);
+    final selectedNorm = DateTime(
+      widget.mood.selectedDate.year,
+      widget.mood.selectedDate.month,
+      widget.mood.selectedDate.day,
+    );
 
-    final earliest = selectedNorm
-            .isBefore(todayNorm.subtract(const Duration(days: 60)))
+    final earliest =
+        selectedNorm.isBefore(todayNorm.subtract(const Duration(days: 60)))
         ? selectedNorm.subtract(const Duration(days: 7))
         : todayNorm.subtract(const Duration(days: 60));
 
-    final latest =
-        selectedNorm.isAfter(todayNorm.add(const Duration(days: 14)))
-            ? selectedNorm.add(const Duration(days: 7))
-            : todayNorm.add(const Duration(days: 14));
+    final latest = selectedNorm.isAfter(todayNorm.add(const Duration(days: 14)))
+        ? selectedNorm.add(const Duration(days: 7))
+        : todayNorm.add(const Duration(days: 14));
 
     final totalDays = latest.difference(earliest).inDays + 1;
     return List.generate(totalDays, (i) => earliest.add(Duration(days: i)));
@@ -281,7 +294,8 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
         itemBuilder: (ctx, i) {
           final day = days[i];
           final isToday = day == todayNorm;
-          final isSelected = day.year == widget.mood.selectedDate.year &&
+          final isSelected =
+              day.year == widget.mood.selectedDate.year &&
               day.month == widget.mood.selectedDate.month &&
               day.day == widget.mood.selectedDate.day;
           final isFuture = day.isAfter(todayNorm);
@@ -295,20 +309,21 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
 
           if (isSelected) {
             bgColor = widget.theme.colorScheme.primary;
-            weekdayColor =
-                widget.theme.colorScheme.onPrimary.withValues(alpha: 0.9);
+            weekdayColor = widget.theme.colorScheme.onPrimary.withValues(
+              alpha: 0.9,
+            );
             dayColor = widget.theme.colorScheme.onPrimary;
             shadows = [
               BoxShadow(
-                color:
-                    widget.theme.colorScheme.primary.withValues(alpha: 0.35),
+                color: widget.theme.colorScheme.primary.withValues(alpha: 0.35),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
             ];
           } else if (isToday) {
-            bgColor = widget.theme.colorScheme.primaryContainer
-                .withValues(alpha: 0.5);
+            bgColor = widget.theme.colorScheme.primaryContainer.withValues(
+              alpha: 0.5,
+            );
             border = Border.all(
               color: widget.theme.colorScheme.primary,
               width: 1.5,
@@ -318,19 +333,23 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
           } else if (isFuture) {
             bgColor = widget.theme.colorScheme.surfaceContainerLowest;
             border = Border.all(
-              color: widget.theme.colorScheme.outlineVariant
-                  .withValues(alpha: 0.2),
+              color: widget.theme.colorScheme.outlineVariant.withValues(
+                alpha: 0.2,
+              ),
               width: 1,
             );
-            weekdayColor = widget.theme.colorScheme.onSurfaceVariant
-                .withValues(alpha: 0.65);
-            dayColor = widget.theme.colorScheme.onSurface
-                .withValues(alpha: 0.65);
+            weekdayColor = widget.theme.colorScheme.onSurfaceVariant.withValues(
+              alpha: 0.65,
+            );
+            dayColor = widget.theme.colorScheme.onSurface.withValues(
+              alpha: 0.65,
+            );
           } else {
             bgColor = widget.theme.colorScheme.surfaceContainerLow;
             border = Border.all(
-              color: widget.theme.colorScheme.outlineVariant
-                  .withValues(alpha: 0.35),
+              color: widget.theme.colorScheme.outlineVariant.withValues(
+                alpha: 0.35,
+              ),
               width: 1,
             );
             weekdayColor = widget.theme.colorScheme.onSurfaceVariant;
@@ -397,20 +416,18 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
                                     ),
                                   )
                                 : isToday
-                                    ? Container(
-                                        width: 4,
-                                        height: 4,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: isSelected
-                                              ? widget.theme.colorScheme
-                                                  .onPrimary
-                                                  .withValues(alpha: 0.7)
-                                              : widget.theme.colorScheme
-                                                  .primary,
-                                        ),
-                                      )
-                                    : const SizedBox(height: 20),
+                                ? Container(
+                                    width: 4,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isSelected
+                                          ? widget.theme.colorScheme.onPrimary
+                                                .withValues(alpha: 0.7)
+                                          : widget.theme.colorScheme.primary,
+                                    ),
+                                  )
+                                : const SizedBox(height: 20),
                           ),
                         ),
                       ],
@@ -436,13 +453,11 @@ class _MonthGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firstDay =
-        DateTime(mood.displayedYear, mood.displayedMonth, 1);
-    final daysInMonth =
-        DateTimeRange(
-          start: firstDay,
-          end: DateTime(mood.displayedYear, mood.displayedMonth + 1, 1),
-        ).duration.inDays;
+    final firstDay = DateTime(mood.displayedYear, mood.displayedMonth, 1);
+    final daysInMonth = DateTimeRange(
+      start: firstDay,
+      end: DateTime(mood.displayedYear, mood.displayedMonth + 1, 1),
+    ).duration.inDays;
 
     int startOffset = firstDay.weekday % 7; // 0=Sun,1=Mon,...
 
@@ -486,9 +501,13 @@ class _MonthGrid extends StatelessWidget {
               if (idx < startOffset) return const SizedBox.shrink();
 
               final day = DateTime(
-                  mood.displayedYear, mood.displayedMonth, idx - startOffset + 1);
+                mood.displayedYear,
+                mood.displayedMonth,
+                idx - startOffset + 1,
+              );
               final isToday = day == todayNorm;
-              final isSelected = day.year == mood.selectedDate.year &&
+              final isSelected =
+                  day.year == mood.selectedDate.year &&
                   day.month == mood.selectedDate.month &&
                   day.day == mood.selectedDate.day;
               final isFuture = day.isAfter(todayNorm);
@@ -502,8 +521,8 @@ class _MonthGrid extends StatelessWidget {
                     color: isSelected
                         ? theme.colorScheme.primary
                         : isToday
-                            ? theme.colorScheme.primaryContainer
-                            : null,
+                        ? theme.colorScheme.primaryContainer
+                        : null,
                   ),
                   child: Stack(
                     alignment: Alignment.center,
@@ -514,9 +533,10 @@ class _MonthGrid extends StatelessWidget {
                           color: isSelected
                               ? theme.colorScheme.onPrimary
                               : isFuture
-                                  ? theme.colorScheme.onSurface
-                                      .withValues(alpha: 0.3)
-                                  : null,
+                              ? theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.3,
+                                )
+                              : null,
                           fontWeight: isSelected || isToday
                               ? FontWeight.bold
                               : null,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mom_ease/features/lessons/data/lesson_repository.dart';
@@ -20,7 +21,10 @@ class _FakeLessonRepository implements LessonRepository {
   @override
   Future<List<Lesson>> getLessonsByMood(String moodTag) async => [];
   @override
-  Future<List<Lesson>> searchLessons(String query, {String lang = 'en'}) async => [];
+  Future<List<Lesson>> searchLessons(
+    String query, {
+    String lang = 'en',
+  }) async => [];
 }
 
 void main() {
@@ -56,7 +60,9 @@ void main() {
     ''';
 
     test('Lesson correctly parses from map / JSON', () {
-      final lesson = Lesson.fromMap(jsonDecode(rawLessonJson) as Map<String, dynamic>);
+      final lesson = Lesson.fromMap(
+        jsonDecode(rawLessonJson) as Map<String, dynamic>,
+      );
 
       expect(lesson.id, equals('lesson_001'));
       expect(lesson.category, equals('self-care'));
@@ -68,15 +74,25 @@ void main() {
     });
 
     test('Bilingual getters return correct language and fallback to en', () {
-      final lesson = Lesson.fromMap(jsonDecode(rawLessonJson) as Map<String, dynamic>);
+      final lesson = Lesson.fromMap(
+        jsonDecode(rawLessonJson) as Map<String, dynamic>,
+      );
 
-      expect(lesson.localizedTitle('en'), equals('5 Important Postpartum Self-Care Tips'));
+      expect(
+        lesson.localizedTitle('en'),
+        equals('5 Important Postpartum Self-Care Tips'),
+      );
       expect(
         lesson.localizedTitle('tl'),
-        equals('5 Mahalagang Paraan ng Pangangalaga sa Sarili Pagkatapos Manganak'),
+        equals(
+          '5 Mahalagang Paraan ng Pangangalaga sa Sarili Pagkatapos Manganak',
+        ),
       );
       // Fallback for unknown language
-      expect(lesson.localizedTitle('fr'), equals('5 Important Postpartum Self-Care Tips'));
+      expect(
+        lesson.localizedTitle('fr'),
+        equals('5 Important Postpartum Self-Care Tips'),
+      );
 
       expect(lesson.localizedTakeaways('tl'), contains('Magpahinga madalas'));
       expect(lesson.localizedTakeaways('en'), contains('Rest often'));
@@ -92,7 +108,9 @@ void main() {
         title: {'en': 'Self-Care Tips'},
         shortDescription: {'en': 'Description'},
         content: {'en': 'Content'},
-        keyTakeaways: {'en': ['Takeaway']},
+        keyTakeaways: {
+          'en': ['Takeaway'],
+        },
         category: 'self-care',
         tags: ['self-care'],
         moodTags: ['happy', 'neutral'],
@@ -103,7 +121,9 @@ void main() {
         title: {'en': 'Understanding Postpartum Depression'},
         shortDescription: {'en': 'Description'},
         content: {'en': 'Content'},
-        keyTakeaways: {'en': ['Takeaway']},
+        keyTakeaways: {
+          'en': ['Takeaway'],
+        },
         category: 'mental-health',
         tags: ['mental-health'],
         moodTags: ['sad', 'verySad'],
@@ -151,75 +171,76 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    testWidgets('Renders headings as actual headers and bold numbers without raw symbols',
-        (WidgetTester tester) async {
-      const lesson = Lesson(
-        id: 'lesson_test',
-        title: {'en': 'Sample Lesson'},
-        shortDescription: {'en': 'Short description'},
-        content: {
-          'en': 'Why Self-Care Matters\n\n'
-              'Self-care is not selfish. When you feel rested, you feel better.\n\n'
-              '1. Rest when you can. Sleep when your baby sleeps.\n\n'
-              '2. Stay nourished. Eat balanced meals.'
-        },
-        keyTakeaways: {
-          'en': ['Takeaway 1']
-        },
-        category: 'self-care',
-        tags: ['self-care'],
-        moodTags: ['neutral'],
-        readingTimeMinutes: 4,
-      );
+    testWidgets(
+      'Renders headings as actual headers and bold numbers without raw symbols',
+      (WidgetTester tester) async {
+        const lesson = Lesson(
+          id: 'lesson_test',
+          title: {'en': 'Sample Lesson'},
+          shortDescription: {'en': 'Short description'},
+          content: {
+            'en':
+                'Why Self-Care Matters\n\n'
+                'Self-care is not selfish. When you feel rested, you feel better.\n\n'
+                '1. Rest when you can. Sleep when your baby sleeps.\n\n'
+                '2. Stay nourished. Eat balanced meals.',
+          },
+          keyTakeaways: {
+            'en': ['Takeaway 1'],
+          },
+          category: 'self-care',
+          tags: ['self-care'],
+          moodTags: ['neutral'],
+          readingTimeMinutes: 4,
+        );
 
-      final lessonProvider = LessonProvider(
-        LessonService(_FakeLessonRepository(), 'test_user'),
-      );
+        final lessonProvider = LessonProvider(
+          LessonService(_FakeLessonRepository(), 'test_user'),
+        );
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider<LessonProvider>.value(
-          value: lessonProvider,
-          child: const MaterialApp(
-            home: LessonDetailScreen(lesson: lesson),
+        await tester.pumpWidget(
+          ChangeNotifierProvider<LessonProvider>.value(
+            value: lessonProvider,
+            child: const MaterialApp(home: LessonDetailScreen(lesson: lesson)),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // Heading should be rendered cleanly as text
-      expect(find.text('Why Self-Care Matters'), findsOneWidget);
+        // Heading should be rendered cleanly as text
+        expect(find.text('Why Self-Care Matters'), findsOneWidget);
 
-      // Raw hashtags or asterisks should never appear anywhere
-      expect(find.textContaining('##'), findsNothing);
-      expect(find.textContaining('**'), findsNothing);
+        // Raw hashtags or asterisks should never appear anywhere
+        expect(find.textContaining('##'), findsNothing);
+        expect(find.textContaining('**'), findsNothing);
 
-      // Numbered bold lead-ins should be present inside RichText
-      final richTexts = find.byType(RichText);
-      expect(richTexts, findsWidgets);
+        // Numbered bold lead-ins should be present inside RichText
+        final richTexts = find.byType(RichText);
+        expect(richTexts, findsWidgets);
 
-      // Verify "1. Rest when you can." is rendered bold
-      bool foundBoldNumber1 = false;
-      bool foundBoldNumber2 = false;
+        // Verify "1. Rest when you can." is rendered bold
+        bool foundBoldNumber1 = false;
+        bool foundBoldNumber2 = false;
 
-      for (final element in richTexts.evaluate()) {
-        final widget = element.widget as RichText;
-        widget.text.visitChildren((span) {
-          if (span is TextSpan && span.text != null) {
-            if (span.text!.contains('1. Rest when you can.') &&
-                span.style?.fontWeight == FontWeight.bold) {
-              foundBoldNumber1 = true;
+        for (final element in richTexts.evaluate()) {
+          final widget = element.widget as RichText;
+          widget.text.visitChildren((span) {
+            if (span is TextSpan && span.text != null) {
+              if (span.text!.contains('1. Rest when you can.') &&
+                  span.style?.fontWeight == FontWeight.bold) {
+                foundBoldNumber1 = true;
+              }
+              if (span.text!.contains('2. Stay nourished.') &&
+                  span.style?.fontWeight == FontWeight.bold) {
+                foundBoldNumber2 = true;
+              }
             }
-            if (span.text!.contains('2. Stay nourished.') &&
-                span.style?.fontWeight == FontWeight.bold) {
-              foundBoldNumber2 = true;
-            }
-          }
-          return true;
-        });
-      }
+            return true;
+          });
+        }
 
-      expect(foundBoldNumber1, isTrue);
-      expect(foundBoldNumber2, isTrue);
-    });
+        expect(foundBoldNumber1, isTrue);
+        expect(foundBoldNumber2, isTrue);
+      },
+    );
   });
 }

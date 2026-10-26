@@ -1,10 +1,7 @@
 import 'dart:convert';
 
 /// Authentication provider types supported by MomEase.
-enum AuthType {
-  local,
-  google,
-}
+enum AuthType { local, google }
 
 extension AuthTypeExtension on AuthType {
   String get value {

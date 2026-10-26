@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import '../models/journal_prompt.dart';
 
 /// Service providing gentle, non-clinical journaling prompt recommendations.
@@ -8,11 +9,9 @@ class JournalPromptService {
   final List<JournalPrompt> _prompts;
   final Random _random;
 
-  JournalPromptService({
-    List<JournalPrompt>? prompts,
-    Random? random,
-  })  : _prompts = prompts ?? kDefaultJournalPrompts,
-        _random = random ?? Random();
+  JournalPromptService({List<JournalPrompt>? prompts, Random? random})
+    : _prompts = prompts ?? kDefaultJournalPrompts,
+      _random = random ?? Random();
 
   List<JournalPrompt> getAllPrompts() => List.unmodifiable(_prompts);
 
@@ -29,7 +28,9 @@ class JournalPromptService {
     if (moodId == null || moodId.isEmpty) return getAllPrompts();
 
     final matches = _prompts
-        .where((p) => p.moodTags.any((t) => t.toLowerCase() == moodId.toLowerCase()))
+        .where(
+          (p) => p.moodTags.any((t) => t.toLowerCase() == moodId.toLowerCase()),
+        )
         .toList();
 
     return matches.isNotEmpty ? matches : getAllPrompts();

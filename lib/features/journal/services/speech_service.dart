@@ -3,13 +3,7 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-enum SpeechStatus {
-  idle,
-  listening,
-  processing,
-  permissionDenied,
-  unavailable,
-}
+enum SpeechStatus { idle, listening, processing, permissionDenied, unavailable }
 
 /// Service managing device speech recognition for hands-free postpartum journaling.
 class SpeechService extends ChangeNotifier {
@@ -84,9 +78,11 @@ class SpeechService extends ChangeNotifier {
   void _detectBestLocale() {
     if (_locales.isEmpty) return;
     // Prefer English or Filipino if present
-    final fil = _locales.where((l) =>
-        l.localeId.toLowerCase().contains('fil') ||
-        l.localeId.toLowerCase().contains('tl'));
+    final fil = _locales.where(
+      (l) =>
+          l.localeId.toLowerCase().contains('fil') ||
+          l.localeId.toLowerCase().contains('tl'),
+    );
     if (fil.isNotEmpty) {
       _selectedLocaleId = fil.first.localeId;
       return;
@@ -137,8 +133,9 @@ class SpeechService extends ChangeNotifier {
     // Determine target locale
     String? targetLocale = _selectedLocaleId;
     if (languageCode != null) {
-      final match = _locales.where((l) =>
-          l.localeId.toLowerCase().startsWith(languageCode.toLowerCase()));
+      final match = _locales.where(
+        (l) => l.localeId.toLowerCase().startsWith(languageCode.toLowerCase()),
+      );
       if (match.isNotEmpty) targetLocale = match.first.localeId;
     }
 

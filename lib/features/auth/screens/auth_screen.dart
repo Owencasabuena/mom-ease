@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../home/screens/home_screen.dart';
 import '../services/auth_provider.dart';
@@ -16,12 +18,13 @@ class AuthScreen extends StatelessWidget {
     if (!context.mounted) return;
 
     if (success) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
     } else {
       // Display friendly dialog explaining Firebase status
-      final errorMsg = auth.errorMessage ??
+      final errorMsg =
+          auth.errorMessage ??
           'Google Sign-In requires Firebase configuration.';
 
       showDialog(
@@ -33,10 +36,7 @@ class AuthScreen extends StatelessWidget {
             color: Theme.of(ctx).colorScheme.primary,
           ),
           title: const Text('Google Sign-In Notice'),
-          content: Text(
-            errorMsg,
-            style: Theme.of(ctx).textTheme.bodyMedium,
-          ),
+          content: Text(errorMsg, style: Theme.of(ctx).textTheme.bodyMedium),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
@@ -46,9 +46,7 @@ class AuthScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(ctx).pop();
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const LocalSetupScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const LocalSetupScreen()),
                 );
               },
               child: const Text('Continue Locally'),
@@ -60,11 +58,8 @@ class AuthScreen extends StatelessWidget {
   }
 
   void _handleContinueLocally(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const LocalSetupScreen(),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const LocalSetupScreen()));
   }
 
   @override
@@ -76,7 +71,10 @@ class AuthScreen extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28.0,
+              vertical: 24.0,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Column(
@@ -85,44 +83,29 @@ class AuthScreen extends StatelessWidget {
                 children: [
                   SizedBox(height: size.height * 0.03),
 
-                  // Soft Hero Emblem
+                  // MomEase Stacked Brand Logo
                   Center(
-                    child: Container(
-                      width: 104,
-                      height: 104,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                            blurRadius: 24,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.spa_rounded,
-                        size: 52,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Header & Warm Tagline
-                  Text(
-                    AppConstants.appName,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.8,
-                      color: theme.colorScheme.onSurface,
+                    child: Image.asset(
+                      AppAssets.stackedLogo(context),
+                      height: 130,
+                      fit: BoxFit.contain,
+                      semanticLabel: 'MomEase logo',
                     ),
                   ),
 
                   const SizedBox(height: 12),
+
+                  Text(
+                    AppConstants.appName,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
 
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -130,14 +113,15 @@ class AuthScreen extends StatelessWidget {
                       AppConstants.appTagline,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.78,
+                        ),
                         height: 1.45,
-                        fontSize: 16,
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 40),
 
                   // Options Box
                   Consumer<AuthProvider>(
@@ -211,8 +195,9 @@ class AuthScreen extends StatelessWidget {
                           child: Text(
                             AppConstants.localPrivacyNotice,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface
-                                  .withValues(alpha: 0.75),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.75,
+                              ),
                               height: 1.4,
                             ),
                           ),

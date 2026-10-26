@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../auth/services/auth_provider.dart';
 
 /// Dialog to update, create, or remove the local PIN.
 class ChangePinDialog extends StatefulWidget {
   final bool hasExistingPin;
 
-  const ChangePinDialog({
-    super.key,
-    required this.hasExistingPin,
-  });
+  const ChangePinDialog({super.key, required this.hasExistingPin});
 
   @override
   State<ChangePinDialog> createState() => _ChangePinDialogState();
@@ -54,10 +52,7 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
           ? 'PIN removed successfully.'
           : 'PIN updated successfully.';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,8 +128,7 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                     ),
-                    onPressed: () =>
-                        setState(() => _obscureNew = !_obscureNew),
+                    onPressed: () => setState(() => _obscureNew = !_obscureNew),
                   ),
                 ),
                 validator: (val) {
@@ -170,7 +164,8 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
                                   : Icons.visibility_off_outlined,
                             ),
                             onPressed: () => setState(
-                                () => _obscureConfirm = !_obscureConfirm),
+                              () => _obscureConfirm = !_obscureConfirm,
+                            ),
                           ),
                         ),
                         validator: (val) {

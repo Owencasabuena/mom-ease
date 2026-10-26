@@ -21,7 +21,10 @@ abstract class JournalRepository {
 
   /// Entries written during [year] and [month].
   Future<List<JournalEntry>> getEntriesForMonth(
-      String userId, int year, int month);
+    String userId,
+    int year,
+    int month,
+  );
 
   /// Search entries matching title, content, or tags.
   Future<List<JournalEntry>> searchEntries(String userId, String query);

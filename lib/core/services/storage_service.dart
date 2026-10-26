@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../constants/app_constants.dart';
 import '../../features/auth/models/user_model.dart';
 
@@ -11,14 +12,15 @@ class StorageService {
   final SharedPreferences _prefs;
   final FlutterSecureStorage _secureStorage;
 
-  StorageService(
-    this._prefs, {
-    FlutterSecureStorage? secureStorage,
-  }) : _secureStorage = secureStorage ??
-            const FlutterSecureStorage(
-              aOptions: AndroidOptions(resetOnError: true),
-              iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
-            );
+  StorageService(this._prefs, {FlutterSecureStorage? secureStorage})
+    : _secureStorage =
+          secureStorage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(resetOnError: true),
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.first_unlock,
+            ),
+          );
 
   static Future<StorageService> initialize() async {
     final prefs = await SharedPreferences.getInstance();
@@ -104,10 +106,7 @@ class StorageService {
   // --- Secure Storage for Local PIN / Password ---
 
   Future<void> saveLocalPin(String pin) async {
-    await _secureStorage.write(
-      key: AppConstants.keySecurePin,
-      value: pin,
-    );
+    await _secureStorage.write(key: AppConstants.keySecurePin, value: pin);
   }
 
   Future<String?> getLocalPin() async {

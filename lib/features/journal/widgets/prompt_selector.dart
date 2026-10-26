@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/journal_prompt.dart';
 import '../services/journal_prompt_service.dart';
 
@@ -110,7 +111,9 @@ class _PromptSelectorSheetState extends State<PromptSelectorSheet> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
               child: Text(
-                isTl ? 'Pumili ng Mungkahing Tanong' : 'Choose a Journal Prompt',
+                isTl
+                    ? 'Pumili ng Mungkahing Tanong'
+                    : 'Choose a Journal Prompt',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -144,8 +147,10 @@ class _PromptSelectorSheetState extends State<PromptSelectorSheet> {
             Expanded(
               child: ListView.separated(
                 controller: scrollController,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 itemCount: prompts.length,
                 separatorBuilder: (context, index) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
@@ -156,8 +161,9 @@ class _PromptSelectorSheetState extends State<PromptSelectorSheet> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
-                        color: theme.colorScheme.outlineVariant
-                            .withValues(alpha: 0.4),
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.4,
+                        ),
                       ),
                     ),
                     child: InkWell(

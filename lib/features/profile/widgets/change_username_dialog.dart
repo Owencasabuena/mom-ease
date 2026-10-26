@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../auth/services/auth_provider.dart';
 
 /// Dialog to update the user's display name.
 class ChangeUsernameDialog extends StatefulWidget {
   final String currentName;
 
-  const ChangeUsernameDialog({
-    super.key,
-    required this.currentName,
-  });
+  const ChangeUsernameDialog({super.key, required this.currentName});
 
   @override
   State<ChangeUsernameDialog> createState() => _ChangeUsernameDialogState();

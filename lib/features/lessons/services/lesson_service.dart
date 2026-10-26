@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../data/lesson_repository.dart';
 import '../models/lesson.dart';
 import '../models/lesson_progress.dart';
@@ -16,10 +18,7 @@ class LessonService {
   static const String _keyLastOpenedPrefix = 'lesson_last_opened_';
   static const String _keyProgressPrefix = 'lesson_progress_map_';
 
-  LessonService(
-    this._repository, [
-    this._userId = 'local_user',
-  ]);
+  LessonService(this._repository, [this._userId = 'local_user']);
 
   String get _bookmarkKey => '$_keyBookmarksPrefix$_userId';
   String get _completedKey => '$_keyCompletedPrefix$_userId';
@@ -151,7 +150,9 @@ class LessonService {
       }
 
       final existing = progressMap[lessonId] != null
-          ? LessonProgress.fromMap(progressMap[lessonId] as Map<String, dynamic>)
+          ? LessonProgress.fromMap(
+              progressMap[lessonId] as Map<String, dynamic>,
+            )
           : LessonProgress(lessonId: lessonId);
 
       final updated = existing.copyWith(lastOpenedAt: DateTime.now());

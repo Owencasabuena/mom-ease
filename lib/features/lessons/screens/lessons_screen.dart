@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../mood/state/mood_provider.dart';
 import '../models/lesson.dart';
 import '../providers/lesson_provider.dart';
@@ -24,12 +25,15 @@ class _LessonsScreenState extends State<LessonsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final lessonProvider =
-          Provider.of<LessonProvider?>(context, listen: false);
+      final lessonProvider = Provider.of<LessonProvider?>(
+        context,
+        listen: false,
+      );
       if (lessonProvider == null) return;
 
       final moodProvider = Provider.of<MoodProvider?>(context, listen: false);
-      final recentMood = moodProvider?.selectedEntry?.mood.name ??
+      final recentMood =
+          moodProvider?.selectedEntry?.mood.name ??
           (moodProvider != null && moodProvider.monthEntries.isNotEmpty
               ? moodProvider.monthEntries.last.mood.name
               : null);
@@ -45,9 +49,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
   void _openLesson(Lesson lesson) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => LessonDetailScreen(lesson: lesson),
-      ),
+      MaterialPageRoute(builder: (_) => LessonDetailScreen(lesson: lesson)),
     );
   }
 
@@ -55,9 +57,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
   Widget build(BuildContext context) {
     final lessonProvider = Provider.of<LessonProvider?>(context);
     if (lessonProvider == null) {
-      return const Scaffold(
-        body: SizedBox.shrink(),
-      );
+      return const Scaffold(body: SizedBox.shrink());
     }
 
     final theme = Theme.of(context);
@@ -90,7 +90,8 @@ class _LessonsScreenState extends State<LessonsScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           final moodProvider = context.read<MoodProvider>();
-          final recentMood = moodProvider.selectedEntry?.mood.name ??
+          final recentMood =
+              moodProvider.selectedEntry?.mood.name ??
               (moodProvider.monthEntries.isNotEmpty
                   ? moodProvider.monthEntries.last.mood.name
                   : null);
@@ -116,10 +117,15 @@ class _LessonsScreenState extends State<LessonsScreen> {
             // Search Bar
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: SearchBar(
                   controller: _searchController,
-                  hintText: isTl ? 'Maghanap ng aralin...' : 'Search lessons...',
+                  hintText: isTl
+                      ? 'Maghanap ng aralin...'
+                      : 'Search lessons...',
                   leading: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
                     child: Icon(Icons.search_rounded),
@@ -142,8 +148,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
-                        color: theme.colorScheme.outlineVariant
-                            .withValues(alpha: 0.4),
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.4,
+                        ),
                       ),
                     ),
                   ),
@@ -166,9 +173,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
             // Content Loading State
             if (lessonProvider.isLoading)
               const SliverFillRemaining(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
+                child: Center(child: CircularProgressIndicator()),
               )
             // Error State
             else if (lessonProvider.errorMessage != null)
@@ -246,14 +251,17 @@ class _LessonsScreenState extends State<LessonsScreen> {
                   child: LessonCard(
                     lesson: lessonProvider.continueLearningLesson!,
                     language: lang,
-                    isBookmarked: lessonProvider.bookmarkedIds
-                        .contains(lessonProvider.continueLearningLesson!.id),
-                    isCompleted: lessonProvider.completedIds
-                        .contains(lessonProvider.continueLearningLesson!.id),
+                    isBookmarked: lessonProvider.bookmarkedIds.contains(
+                      lessonProvider.continueLearningLesson!.id,
+                    ),
+                    isCompleted: lessonProvider.completedIds.contains(
+                      lessonProvider.continueLearningLesson!.id,
+                    ),
                     onTap: () =>
                         _openLesson(lessonProvider.continueLearningLesson!),
                     onToggleBookmark: () => lessonProvider.toggleBookmark(
-                        lessonProvider.continueLearningLesson!.id),
+                      lessonProvider.continueLearningLesson!.id,
+                    ),
                   ),
                 ),
               ],
@@ -265,13 +273,11 @@ class _LessonsScreenState extends State<LessonsScreen> {
                   child: Text(
                     lessonProvider.searchQuery.isNotEmpty
                         ? (isTl
-                            ? 'Mga Resulta ng Paghahanap'
-                            : 'Search Results')
+                              ? 'Mga Resulta ng Paghahanap'
+                              : 'Search Results')
                         : lessonProvider.selectedCategory == 'saved'
-                            ? (isTl
-                                ? 'Mga Nai-save na Aralin'
-                                : 'Saved Lessons')
-                            : (isTl ? 'Lahat ng Aralin' : 'All Lessons'),
+                        ? (isTl ? 'Mga Nai-save na Aralin' : 'Saved Lessons')
+                        : (isTl ? 'Lahat ng Aralin' : 'All Lessons'),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -285,7 +291,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 40),
+                      horizontal: 32,
+                      vertical: 40,
+                    ),
                     child: Center(
                       child: Column(
                         children: [
@@ -300,11 +308,11 @@ class _LessonsScreenState extends State<LessonsScreen> {
                           Text(
                             lessonProvider.selectedCategory == 'saved'
                                 ? (isTl
-                                    ? 'Wala pang nai-save na aralin.\nPindutin ang bookmark icon sa anumang aralin para i-save ito.'
-                                    : 'No saved lessons yet.\nTap the bookmark icon on any lesson to save it for later.')
+                                      ? 'Wala pang nai-save na aralin.\nPindutin ang bookmark icon sa anumang aralin para i-save ito.'
+                                      : 'No saved lessons yet.\nTap the bookmark icon on any lesson to save it for later.')
                                 : (isTl
-                                    ? 'Walang nahanap na aralin para sa "${lessonProvider.searchQuery}".'
-                                    : 'No lessons found for "${lessonProvider.searchQuery}".'),
+                                      ? 'Walang nahanap na aralin para sa "${lessonProvider.searchQuery}".'
+                                      : 'No lessons found for "${lessonProvider.searchQuery}".'),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -318,26 +326,25 @@ class _LessonsScreenState extends State<LessonsScreen> {
               else
                 // List of filtered lessons
                 SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final lesson = lessonProvider.filteredLessons[index];
-                      final isBookmarked =
-                          lessonProvider.bookmarkedIds.contains(lesson.id);
-                      final isCompleted =
-                          lessonProvider.completedIds.contains(lesson.id);
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final lesson = lessonProvider.filteredLessons[index];
+                    final isBookmarked = lessonProvider.bookmarkedIds.contains(
+                      lesson.id,
+                    );
+                    final isCompleted = lessonProvider.completedIds.contains(
+                      lesson.id,
+                    );
 
-                      return LessonCard(
-                        lesson: lesson,
-                        language: lang,
-                        isBookmarked: isBookmarked,
-                        isCompleted: isCompleted,
-                        onTap: () => _openLesson(lesson),
-                        onToggleBookmark: () =>
-                            lessonProvider.toggleBookmark(lesson.id),
-                      );
-                    },
-                    childCount: lessonProvider.filteredLessons.length,
-                  ),
+                    return LessonCard(
+                      lesson: lesson,
+                      language: lang,
+                      isBookmarked: isBookmarked,
+                      isCompleted: isCompleted,
+                      onTap: () => _openLesson(lesson),
+                      onToggleBookmark: () =>
+                          lessonProvider.toggleBookmark(lesson.id),
+                    );
+                  }, childCount: lessonProvider.filteredLessons.length),
                 ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 80)),

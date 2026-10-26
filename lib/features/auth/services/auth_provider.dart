@@ -1,14 +1,11 @@
 import 'package:flutter/foundation.dart';
+
 import '../../../core/services/storage_service.dart';
 import '../models/user_model.dart';
 import 'google_auth_service.dart';
 import 'local_auth_service.dart';
 
-enum AuthState {
-  initial,
-  authenticated,
-  unauthenticated,
-}
+enum AuthState { initial, authenticated, unauthenticated }
 
 /// Central state manager for authentication across MomEase.
 class AuthProvider extends ChangeNotifier {
@@ -43,7 +40,9 @@ class AuthProvider extends ChangeNotifier {
 
   AuthState get state {
     if (!_isInitialized) return AuthState.initial;
-    return _currentUser != null ? AuthState.authenticated : AuthState.unauthenticated;
+    return _currentUser != null
+        ? AuthState.authenticated
+        : AuthState.unauthenticated;
   }
 
   /// Initializes auth state on application launch without flashing screens.
@@ -139,20 +138,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Updates or removes the local PIN/password.
-  Future<bool> updatePin({
-    String? oldPin,
-    required String newPin,
-  }) async {
+  Future<bool> updatePin({String? oldPin, required String newPin}) async {
     if (_currentUser == null || !_currentUser!.isLocal) return false;
 
     _setLoading(true);
     _errorMessage = null;
 
     try {
-      await _localAuthService.updateLocalPin(
-        oldPin: oldPin,
-        newPin: newPin,
-      );
+      await _localAuthService.updateLocalPin(oldPin: oldPin, newPin: newPin);
       // Refresh user object to sync hasPin status
       _currentUser = await _localAuthService.getCurrentUser();
       _setLoading(false);

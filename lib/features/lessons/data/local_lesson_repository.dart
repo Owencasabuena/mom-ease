@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
 import '../models/lesson.dart';
 import 'lesson_repository.dart';
 
@@ -10,9 +12,7 @@ class LocalLessonRepository implements LessonRepository {
   final String assetPath;
   List<Lesson>? _cachedLessons;
 
-  LocalLessonRepository({
-    this.assetPath = 'assets/data/lessons.json',
-  });
+  LocalLessonRepository({this.assetPath = 'assets/data/lessons.json'});
 
   @override
   Future<List<Lesson>> getAllLessons() async {

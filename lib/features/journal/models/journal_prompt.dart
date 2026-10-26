@@ -17,20 +17,20 @@ class JournalPrompt {
   String localizedText(String lang) => lang == 'tl' ? textTl : textEn;
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'textEn': textEn,
-        'textTl': textTl,
-        'category': category,
-        'moodTags': moodTags,
-      };
+    'id': id,
+    'textEn': textEn,
+    'textTl': textTl,
+    'category': category,
+    'moodTags': moodTags,
+  };
 
   factory JournalPrompt.fromMap(Map<String, dynamic> map) => JournalPrompt(
-        id: map['id'] as String,
-        textEn: map['textEn'] as String,
-        textTl: map['textTl'] as String,
-        category: map['category'] as String,
-        moodTags: List<String>.from(map['moodTags'] ?? []),
-      );
+    id: map['id'] as String,
+    textEn: map['textEn'] as String,
+    textTl: map['textTl'] as String,
+    category: map['category'] as String,
+    moodTags: List<String>.from(map['moodTags'] ?? []),
+  );
 }
 
 /// Built-in prompts covering reflection, gratitude, self-care, support, and recovery.
@@ -88,7 +88,8 @@ const List<JournalPrompt> kDefaultJournalPrompts = [
   JournalPrompt(
     id: 'prompt_008',
     textEn: 'What is one small thing you can do for yourself tomorrow?',
-    textTl: 'Ano ang maliit na bagay na maaari mong gawin para sa sarili mo bukas?',
+    textTl:
+        'Ano ang maliit na bagay na maaari mong gawin para sa sarili mo bukas?',
     category: 'self-care',
     moodTags: ['neutral', 'sad'],
   ),

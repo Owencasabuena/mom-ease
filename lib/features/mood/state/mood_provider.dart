@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/mood_entry.dart';
 import '../models/mood_type.dart';
 import '../services/mood_service.dart';
@@ -40,8 +41,7 @@ class MoodProvider extends ChangeNotifier {
   bool get showSupportMessage => _showSupportMessage;
 
   bool get isFutureDate => _selectedDate.isAfter(_today);
-  int get totalCheckInsThisMonth =>
-      _monthEntries.length;
+  int get totalCheckInsThisMonth => _monthEntries.length;
 
   DateTime get _today {
     final n = DateTime.now();
@@ -94,8 +94,7 @@ class MoodProvider extends ChangeNotifier {
 
   // ── Mood persistence ─────────────────────────────────────────────────────────
 
-  Future<String?> saveMoodForSelectedDate(MoodType mood,
-      {String? note}) async {
+  Future<String?> saveMoodForSelectedDate(MoodType mood, {String? note}) async {
     _loading = true;
     _error = null;
     notifyListeners();
@@ -111,8 +110,7 @@ class MoodProvider extends ChangeNotifier {
         updatedAt: now,
       );
 
-      final exists =
-          await _service.hasMoodForDate(_userId, _selectedDate);
+      final exists = await _service.hasMoodForDate(_userId, _selectedDate);
       if (exists) {
         await _service.updateMood(entry);
       } else {
@@ -137,9 +135,15 @@ class MoodProvider extends ChangeNotifier {
   Future<void> _loadMonth() async {
     try {
       _monthEntries = await _service.getMoodsForMonth(
-          _userId, _displayedYear, _displayedMonth);
+        _userId,
+        _displayedYear,
+        _displayedMonth,
+      );
       _monthlyCounts = await _service.getMoodCountsForMonth(
-          _userId, _displayedYear, _displayedMonth);
+        _userId,
+        _displayedYear,
+        _displayedMonth,
+      );
     } catch (_) {
       _error = 'Something went wrong while loading your mood history.';
     }
@@ -147,16 +151,14 @@ class MoodProvider extends ChangeNotifier {
 
   Future<void> _loadSelectedEntry() async {
     try {
-      _selectedEntry =
-          await _service.getMoodForDate(_userId, _selectedDate);
+      _selectedEntry = await _service.getMoodForDate(_userId, _selectedDate);
     } catch (_) {
       _selectedEntry = null;
     }
   }
 
   Future<void> _checkSupportThreshold() async {
-    _showSupportMessage =
-        await _service.shouldShowSupportMessage(_userId);
+    _showSupportMessage = await _service.shouldShowSupportMessage(_userId);
   }
 
   /// Lookup a logged mood for any arbitrary day (used by calendar / date selector).
@@ -164,9 +166,10 @@ class MoodProvider extends ChangeNotifier {
     final d = DateTime(day.year, day.month, day.day);
     try {
       return _monthEntries.firstWhere(
-        (e) => e.date.year == d.year &&
-               e.date.month == d.month &&
-               e.date.day == d.day,
+        (e) =>
+            e.date.year == d.year &&
+            e.date.month == d.month &&
+            e.date.day == d.day,
       );
     } catch (_) {
       return null;

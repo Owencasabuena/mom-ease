@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/lesson.dart';
 import '../services/lesson_recommendation_service.dart';
 import '../services/lesson_service.dart';
@@ -24,7 +25,7 @@ class LessonProvider extends ChangeNotifier {
     this._lessonService, [
     LessonRecommendationService? recommendationService,
   ]) : _recommendationService =
-            recommendationService ?? LessonRecommendationService();
+           recommendationService ?? LessonRecommendationService();
 
   // ── Getters ──────────────────────────────────────────────────────────────
 

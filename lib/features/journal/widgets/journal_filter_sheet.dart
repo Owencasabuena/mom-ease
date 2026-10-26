@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/theme/app_colors.dart';
 import '../../mood/models/mood_type.dart';
 import '../providers/journal_provider.dart';
 
@@ -7,10 +9,7 @@ import '../providers/journal_provider.dart';
 class JournalFilterSheet extends StatelessWidget {
   final JournalProvider provider;
 
-  const JournalFilterSheet({
-    super.key,
-    required this.provider,
-  });
+  const JournalFilterSheet({super.key, required this.provider});
 
   static Future<void> show(BuildContext context, JournalProvider provider) {
     return showModalBottomSheet(
@@ -63,11 +62,14 @@ class JournalFilterSheet extends StatelessWidget {
                   secondary: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.15),
+                      color: AppColors.favoriteStar.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.star_rounded,
-                        color: Colors.amber, size: 22),
+                    child: const Icon(
+                      Icons.star_rounded,
+                      color: AppColors.favoriteStar,
+                      size: 22,
+                    ),
                   ),
                   value: provider.onlyFavorites,
                   onChanged: (val) => provider.setFilterFavorites(val),
@@ -108,9 +110,9 @@ class JournalFilterSheet extends StatelessWidget {
                               height: 24,
                               errorBuilder: (context, error, stackTrace) =>
                                   Text(
-                                mood.emoji,
-                                style: const TextStyle(fontSize: 20),
-                              ),
+                                    mood.emoji,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
                             ),
                             selected: isSel,
                             onSelected: (sel) {
@@ -152,7 +154,8 @@ class JournalFilterSheet extends StatelessWidget {
                         },
                       ),
                       ...provider.availableTags.map((tag) {
-                        final isSel = provider.filterTag?.toLowerCase() ==
+                        final isSel =
+                            provider.filterTag?.toLowerCase() ==
                             tag.toLowerCase();
                         return FilterChip(
                           label: Text('#$tag'),
@@ -161,8 +164,9 @@ class JournalFilterSheet extends StatelessWidget {
                             provider.setFilterTag(sel ? tag : null);
                           },
                           labelStyle: TextStyle(
-                            fontWeight:
-                                isSel ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isSel
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         );
                       }),

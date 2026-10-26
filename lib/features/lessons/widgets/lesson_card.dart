@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/lesson.dart';
 
 class LessonCard extends StatelessWidget {
@@ -46,9 +47,9 @@ class LessonCard extends StatelessWidget {
       case 'mental-health':
         return theme.colorScheme.tertiary;
       case 'physical-health':
-        return Colors.teal;
+        return theme.colorScheme.secondary;
       case 'mother-and-baby':
-        return Colors.pinkAccent;
+        return theme.colorScheme.primary;
       default:
         return theme.colorScheme.primary;
     }
@@ -123,7 +124,9 @@ class LessonCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.primaryContainer
                                   .withValues(alpha: 0.5),

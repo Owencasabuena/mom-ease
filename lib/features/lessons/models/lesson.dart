@@ -42,14 +42,12 @@ class Lesson {
   });
 
   /// Convenience getters for the currently selected language, with fallback.
-  String localizedTitle(String lang) =>
-      title[lang] ?? title['en'] ?? '';
+  String localizedTitle(String lang) => title[lang] ?? title['en'] ?? '';
 
   String localizedDescription(String lang) =>
       shortDescription[lang] ?? shortDescription['en'] ?? '';
 
-  String localizedContent(String lang) =>
-      content[lang] ?? content['en'] ?? '';
+  String localizedContent(String lang) => content[lang] ?? content['en'] ?? '';
 
   List<String> localizedTakeaways(String lang) =>
       keyTakeaways[lang] ?? keyTakeaways['en'] ?? [];
@@ -93,8 +91,8 @@ class Lesson {
       isMedicalTopic: map['isMedicalTopic'] as bool? ?? false,
       sources: map['sources'] != null
           ? (map['sources'] as List)
-              .map((s) => LessonSource.fromMap(s as Map<String, dynamic>))
-              .toList()
+                .map((s) => LessonSource.fromMap(s as Map<String, dynamic>))
+                .toList()
           : null,
     );
   }
@@ -103,21 +101,21 @@ class Lesson {
       Lesson.fromMap(jsonDecode(json) as Map<String, dynamic>);
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'title': title,
-        'shortDescription': shortDescription,
-        'content': content,
-        'keyTakeaways': keyTakeaways,
-        'category': category,
-        'tags': tags,
-        'moodTags': moodTags,
-        'readingTimeMinutes': readingTimeMinutes,
-        'videoUrl': videoUrl,
-        'thumbnailUrl': thumbnailUrl,
-        'sourceName': sourceName,
-        'isMedicalTopic': isMedicalTopic,
-        'sources': sources?.map((s) => s.toMap()).toList(),
-      };
+    'id': id,
+    'title': title,
+    'shortDescription': shortDescription,
+    'content': content,
+    'keyTakeaways': keyTakeaways,
+    'category': category,
+    'tags': tags,
+    'moodTags': moodTags,
+    'readingTimeMinutes': readingTimeMinutes,
+    'videoUrl': videoUrl,
+    'thumbnailUrl': thumbnailUrl,
+    'sourceName': sourceName,
+    'isMedicalTopic': isMedicalTopic,
+    'sources': sources?.map((s) => s.toMap()).toList(),
+  };
 
   String toJson() => jsonEncode(toMap());
 
@@ -132,10 +130,12 @@ class Lesson {
 
   static Map<String, List<String>> _castStringListMap(dynamic raw) {
     if (raw is Map) {
-      return raw.map((k, v) => MapEntry(
-            k.toString(),
-            (v as List).map((e) => e.toString()).toList(),
-          ));
+      return raw.map(
+        (k, v) => MapEntry(
+          k.toString(),
+          (v as List).map((e) => e.toString()).toList(),
+        ),
+      );
     }
     return {};
   }
@@ -150,14 +150,14 @@ class LessonSource {
   const LessonSource({this.title, this.organization, this.url});
 
   factory LessonSource.fromMap(Map<String, dynamic> map) => LessonSource(
-        title: map['title'] as String?,
-        organization: map['organization'] as String?,
-        url: map['url'] as String?,
-      );
+    title: map['title'] as String?,
+    organization: map['organization'] as String?,
+    url: map['url'] as String?,
+  );
 
   Map<String, dynamic> toMap() => {
-        'title': title,
-        'organization': organization,
-        'url': url,
-      };
+    'title': title,
+    'organization': organization,
+    'url': url,
+  };
 }

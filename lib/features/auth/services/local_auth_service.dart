@@ -42,7 +42,9 @@ class LocalAuthService implements AuthService {
 
     if (hasPin) {
       if (trimmedPin.length < 4) {
-        throw const LocalAuthException('PIN/Password must be at least 4 characters.');
+        throw const LocalAuthException(
+          'PIN/Password must be at least 4 characters.',
+        );
       }
       await _storageService.saveLocalPin(trimmedPin);
     }
@@ -77,10 +79,7 @@ class LocalAuthService implements AuthService {
   }
 
   @override
-  Future<void> updateLocalPin({
-    String? oldPin,
-    required String newPin,
-  }) async {
+  Future<void> updateLocalPin({String? oldPin, required String newPin}) async {
     final currentHasPin = await _storageService.hasLocalPin();
     if (currentHasPin) {
       if (oldPin == null || oldPin.isEmpty) {

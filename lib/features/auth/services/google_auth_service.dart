@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 import '../../../core/services/storage_service.dart';
 import '../models/user_model.dart';
 import 'auth_service.dart';
@@ -70,16 +71,14 @@ class GoogleAuthService implements AuthService {
 
     try {
       final GoogleSignIn signIn = GoogleSignIn.instance;
-      await signIn.initialize(
-        serverClientId: serverClientId,
-      );
+      await signIn.initialize(serverClientId: serverClientId);
       final GoogleSignInAccount googleUser = await signIn.authenticate();
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
-      final UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
       final User? user = userCredential.user;
       if (user == null) {
         throw Exception('Failed to obtain user from Firebase.');

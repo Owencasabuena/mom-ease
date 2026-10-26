@@ -86,7 +86,8 @@ class CategoryChips extends StatelessWidget {
         separatorBuilder: (_, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final item = kLessonCategories[index];
-          final isSelected = selectedCategory.toLowerCase() == item.id.toLowerCase();
+          final isSelected =
+              selectedCategory.toLowerCase() == item.id.toLowerCase();
 
           return FilterChip(
             selected: isSelected,

@@ -22,9 +22,13 @@ class JournalEmptyState extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
 
     final isDateFiltered = filterDate != null;
-    final isFutureDate = isDateFiltered &&
-        DateTime(filterDate!.year, filterDate!.month, filterDate!.day)
-            .isAfter(today);
+    final isFutureDate =
+        isDateFiltered &&
+        DateTime(
+          filterDate!.year,
+          filterDate!.month,
+          filterDate!.day,
+        ).isAfter(today);
 
     final String title;
     final String subtitle;
@@ -51,11 +55,15 @@ class JournalEmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.5,
+                ),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isDateFiltered ? Icons.event_note_rounded : Icons.menu_book_rounded,
+                isDateFiltered
+                    ? Icons.event_note_rounded
+                    : Icons.menu_book_rounded,
                 size: 40,
                 color: theme.colorScheme.primary,
               ),

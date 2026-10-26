@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+import '../../../core/theme/app_colors.dart';
 import '../../mood/models/mood_type.dart';
 import '../models/journal_entry.dart';
 
@@ -86,9 +88,7 @@ class JournalEntryCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       '•',
-                      style: TextStyle(
-                        color: theme.colorScheme.outlineVariant,
-                      ),
+                      style: TextStyle(color: theme.colorScheme.outlineVariant),
                     ),
                     const SizedBox(width: 6),
                   ],
@@ -126,8 +126,10 @@ class JournalEntryCard extends StatelessWidget {
                             ? Icons.star_rounded
                             : Icons.star_border_rounded,
                         color: entry.isFavorite
-                            ? Colors.amber
-                            : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                            ? AppColors.favoriteStar
+                            : theme.colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.6,
+                              ),
                         size: 22,
                       ),
                       padding: EdgeInsets.zero,
@@ -175,7 +177,9 @@ class JournalEntryCard extends StatelessWidget {
                     ...visibleTags.map((tag) {
                       return Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surfaceContainerHighest
                               .withValues(alpha: 0.6),
@@ -194,7 +198,9 @@ class JournalEntryCard extends StatelessWidget {
                     if (remainingTagsCount > 0)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(6),

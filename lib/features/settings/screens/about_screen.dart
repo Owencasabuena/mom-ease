@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_constants.dart';
+
+import '../../../core/constants/app_assets.dart';
 
 /// Screen explaining MomEase's mission, privacy promise, and version.
 class AboutScreen extends StatelessWidget {
@@ -10,9 +11,7 @@ class AboutScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About MomEase'),
-      ),
+      appBar: AppBar(title: const Text('About MomEase')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -22,28 +21,14 @@ class AboutScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
-                  child: Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.spa_rounded,
-                      size: 44,
-                      color: theme.colorScheme.primary,
-                    ),
+                  child: Image.asset(
+                    AppAssets.horizontalLogo(context),
+                    height: 52,
+                    fit: BoxFit.contain,
+                    semanticLabel: 'MomEase logo',
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  AppConstants.appName,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const SizedBox(height: 8),
                 Text(
                   'Version 1.0.0 (Local Preview)',
                   textAlign: TextAlign.center,
@@ -82,7 +67,9 @@ class AboutScreen extends StatelessWidget {
                           'giving you a safe harbor to check in with yourself, honor your recovery, and breathe.',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             height: 1.5,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.8,
+                            ),
                           ),
                         ),
                       ],
@@ -121,7 +108,9 @@ class AboutScreen extends StatelessWidget {
                           'on your device without requiring an active internet connection.',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             height: 1.5,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.8,
+                            ),
                           ),
                         ),
                       ],

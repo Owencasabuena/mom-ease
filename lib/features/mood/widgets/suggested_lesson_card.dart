@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../lessons/models/lesson.dart';
 import '../../lessons/providers/lesson_provider.dart';
 import '../../lessons/screens/lesson_detail_screen.dart';
@@ -36,7 +37,8 @@ class SuggestedLessonCard extends StatelessWidget {
     final isTl = lang == 'tl';
 
     // Pick active mood: selectedEntry takes priority, then most recent in month
-    final currentMood = mood.selectedEntry?.mood ??
+    final currentMood =
+        mood.selectedEntry?.mood ??
         (mood.monthEntries.isNotEmpty ? mood.monthEntries.last.mood : null);
 
     Lesson? recommendedLesson;
@@ -59,15 +61,14 @@ class SuggestedLessonCard extends StatelessWidget {
             children: [
               Text(
                 isTl ? 'Mungkahing Aralin' : 'Suggested for you',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
               if (currentMood != null && recommendedLesson != null)
                 Text(
-                  isTl
-                      ? 'Batay sa iyong check-in'
-                      : 'Based on your check-in',
+                  isTl ? 'Batay sa iyong check-in' : 'Based on your check-in',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -96,13 +97,15 @@ class SuggestedLessonCard extends StatelessWidget {
           else
             Card(
               elevation: 0,
-              color:
-                  theme.colorScheme.secondaryContainer.withValues(alpha: 0.35),
+              color: theme.colorScheme.secondaryContainer.withValues(
+                alpha: 0.35,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color:
-                      theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.3,
+                  ),
                 ),
               ),
               child: InkWell(
@@ -185,7 +188,9 @@ class SuggestedLessonCard extends StatelessWidget {
                                   style: TextButton.styleFrom(
                                     minimumSize: Size.zero,
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 6),
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
                                     tapTargetSize:
                                         MaterialTapTargetSize.shrinkWrap,
                                   ),

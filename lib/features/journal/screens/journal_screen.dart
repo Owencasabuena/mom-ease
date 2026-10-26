@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/theme/app_colors.dart';
 import '../../lessons/providers/lesson_provider.dart';
 import '../../mood/models/mood_type.dart';
 import '../../mood/state/mood_provider.dart';
@@ -33,8 +35,10 @@ class _JournalScreenState extends State<JournalScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final journalProvider =
-          Provider.of<JournalProvider?>(context, listen: false);
+      final journalProvider = Provider.of<JournalProvider?>(
+        context,
+        listen: false,
+      );
       if (journalProvider == null) return;
       final moodProvider = Provider.of<MoodProvider?>(context, listen: false);
       final currentMoodId = moodProvider?.selectedEntry?.mood.name;
@@ -63,8 +67,10 @@ class _JournalScreenState extends State<JournalScreen> {
       ),
     );
     if (mounted) {
-      final journalProvider =
-          Provider.of<JournalProvider?>(context, listen: false);
+      final journalProvider = Provider.of<JournalProvider?>(
+        context,
+        listen: false,
+      );
       await journalProvider?.reloadEntries();
     }
   }
@@ -87,7 +93,9 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 
   Widget _buildActiveFilterChips(
-      BuildContext context, JournalProvider provider) {
+    BuildContext context,
+    JournalProvider provider,
+  ) {
     final chips = <Widget>[];
     final theme = Theme.of(context);
 
@@ -114,8 +122,7 @@ class _JournalScreenState extends State<JournalScreen> {
                   mood.assetPath,
                   width: 14,
                   height: 14,
-                  errorBuilder: (_, _, _) =>
-                      const Icon(Icons.mood, size: 14),
+                  errorBuilder: (_, _, _) => const Icon(Icons.mood, size: 14),
                 )
               : null,
           label: Text(mood?.label ?? provider.filterMoodId!),
@@ -142,8 +149,11 @@ class _JournalScreenState extends State<JournalScreen> {
     if (provider.onlyFavorites) {
       chips.add(
         InputChip(
-          avatar:
-              const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+          avatar: const Icon(
+            Icons.star_rounded,
+            size: 14,
+            color: AppColors.favoriteStar,
+          ),
           label: const Text('Favorites'),
           deleteIcon: const Icon(Icons.close_rounded, size: 16),
           onDeleted: () => provider.setFilterFavorites(false),
@@ -189,8 +199,9 @@ class _JournalScreenState extends State<JournalScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer
-                        .withValues(alpha: 0.6),
+                    color: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.6,
+                    ),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -278,7 +289,9 @@ class _JournalScreenState extends State<JournalScreen> {
                   label: const Text('Unlock Journal'),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -297,9 +310,7 @@ class _JournalScreenState extends State<JournalScreen> {
     final theme = Theme.of(context);
     final provider = Provider.of<JournalProvider?>(context);
     if (provider == null) {
-      return const Scaffold(
-        body: SizedBox.shrink(),
-      );
+      return const Scaffold(body: SizedBox.shrink());
     }
     final lessonProvider = Provider.of<LessonProvider?>(context);
     final currentLang = lessonProvider?.currentLanguage ?? 'en';
@@ -346,11 +357,11 @@ class _JournalScreenState extends State<JournalScreen> {
                               children: [
                                 Text(
                                   'My Journal',
-                                  style:
-                                      theme.textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -0.5,
-                                  ),
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: -0.5,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -413,15 +424,19 @@ class _JournalScreenState extends State<JournalScreen> {
                       if (draft != null && !draft.isEmpty)
                         Card(
                           elevation: 0,
-                          color: theme.colorScheme.errorContainer
-                              .withValues(alpha: 0.3),
+                          color: theme.colorScheme.errorContainer.withValues(
+                            alpha: 0.3,
+                          ),
                           margin: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 6),
+                            horizontal: 0,
+                            vertical: 6,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
-                              color: theme.colorScheme.error
-                                  .withValues(alpha: 0.3),
+                              color: theme.colorScheme.error.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                           ),
                           child: Padding(
@@ -442,9 +457,9 @@ class _JournalScreenState extends State<JournalScreen> {
                                         'Unfinished entry',
                                         style: theme.textTheme.labelMedium
                                             ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: theme.colorScheme.error,
-                                        ),
+                                              fontWeight: FontWeight.bold,
+                                              color: theme.colorScheme.error,
+                                            ),
                                       ),
                                       Text(
                                         draft.content.isNotEmpty
@@ -452,11 +467,12 @@ class _JournalScreenState extends State<JournalScreen> {
                                             : draft.title,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style:
-                                            theme.textTheme.bodySmall?.copyWith(
-                                          color: theme
-                                              .colorScheme.onSurfaceVariant,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -474,7 +490,8 @@ class _JournalScreenState extends State<JournalScreen> {
                                   style: FilledButton.styleFrom(
                                     visualDensity: VisualDensity.compact,
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 12),
+                                      horizontal: 12,
+                                    ),
                                   ),
                                   child: const Text('Continue'),
                                 ),
@@ -494,7 +511,8 @@ class _JournalScreenState extends State<JournalScreen> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => JournalDetailScreen(
-                                        entry: answeredEntry),
+                                      entry: answeredEntry,
+                                    ),
                                   ),
                                 );
                               }
@@ -513,17 +531,19 @@ class _JournalScreenState extends State<JournalScreen> {
                           Expanded(
                             child: TextField(
                               controller: _searchController,
-                              onChanged: (val) =>
-                                  provider.setSearchQuery(val),
+                              onChanged: (val) => provider.setSearchQuery(val),
                               decoration: InputDecoration(
                                 hintText: 'Search your journal...',
-                                prefixIcon: const Icon(Icons.search_rounded,
-                                    size: 20),
+                                prefixIcon: const Icon(
+                                  Icons.search_rounded,
+                                  size: 20,
+                                ),
                                 suffixIcon: _searchController.text.isNotEmpty
                                     ? IconButton(
                                         icon: const Icon(
-                                            Icons.clear_rounded,
-                                            size: 18),
+                                          Icons.clear_rounded,
+                                          size: 18,
+                                        ),
                                         onPressed: () {
                                           _searchController.clear();
                                           provider.setSearchQuery('');
@@ -564,12 +584,12 @@ class _JournalScreenState extends State<JournalScreen> {
                               alignment: Alignment.center,
                               children: [
                                 IconButton.filledTonal(
-                                  icon:
-                                      const Icon(Icons.filter_list_rounded),
+                                  icon: const Icon(Icons.filter_list_rounded),
                                   tooltip: 'Filter journal entries',
-                                  onPressed: () =>
-                                      JournalFilterSheet.show(
-                                          context, provider),
+                                  onPressed: () => JournalFilterSheet.show(
+                                    context,
+                                    provider,
+                                  ),
                                 ),
                                 if (provider.hasActiveTypeFilters)
                                   Positioned(
@@ -590,8 +610,7 @@ class _JournalScreenState extends State<JournalScreen> {
                                         style: TextStyle(
                                           fontSize: 9,
                                           fontWeight: FontWeight.bold,
-                                          color: theme
-                                              .colorScheme.onPrimary,
+                                          color: theme.colorScheme.onPrimary,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -658,29 +677,25 @@ class _JournalScreenState extends State<JournalScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.only(bottom: 84),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final entry = entries[index];
-                        return JournalEntryCard(
-                          entry: entry,
-                          onTap: () async {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    JournalDetailScreen(entry: entry),
-                              ),
-                            );
-                            if (mounted) {
-                              provider.reloadEntries();
-                            }
-                          },
-                          onFavoriteToggle: () {
-                            provider.toggleFavorite(entry.id);
-                          },
-                        );
-                      },
-                      childCount: entries.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final entry = entries[index];
+                      return JournalEntryCard(
+                        entry: entry,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => JournalDetailScreen(entry: entry),
+                            ),
+                          );
+                          if (mounted) {
+                            provider.reloadEntries();
+                          }
+                        },
+                        onFavoriteToggle: () {
+                          provider.toggleFavorite(entry.id);
+                        },
+                      );
+                    }, childCount: entries.length),
                   ),
                 ),
             ],

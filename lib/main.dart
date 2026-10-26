@@ -49,8 +49,10 @@ void main() async {
   final storageService = await StorageService.initialize();
 
   // Initialize auth & theme providers
-  final authProvider =
-      AuthProvider(storageService, isFirebaseReady: isFirebaseReady);
+  final authProvider = AuthProvider(
+    storageService,
+    isFirebaseReady: isFirebaseReady,
+  );
   final themeProvider = ThemeProvider(storageService);
 
   // Hydrate auth state prior to UI render
@@ -74,10 +76,7 @@ void main() async {
             if (previous != null && previous.userId == userId) {
               return previous;
             }
-            return MoodProvider(
-              MoodService(LocalMoodRepository()),
-              userId,
-            );
+            return MoodProvider(MoodService(LocalMoodRepository()), userId);
           },
         ),
         ChangeNotifierProxyProvider<AuthProvider, LessonProvider>(
@@ -93,10 +92,7 @@ void main() async {
             }
             final userId = auth.currentUser?.id ?? 'local_user';
             return LessonProvider(
-              LessonService(
-                LocalLessonRepository(),
-                userId,
-              ),
+              LessonService(LocalLessonRepository(), userId),
             );
           },
         ),
@@ -114,11 +110,7 @@ void main() async {
               return previous;
             }
             return JournalProvider(
-              JournalService(
-                LocalJournalRepository(),
-                userId,
-                storageService,
-              ),
+              JournalService(LocalJournalRepository(), userId, storageService),
             );
           },
         ),

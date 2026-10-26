@@ -74,9 +74,7 @@ class _LessonVideoSectionState extends State<LessonVideoSection> {
       _controller = YoutubePlayerController.fromVideoId(
         videoId: _videoId!,
         autoPlay: true,
-        params: const YoutubePlayerParams(
-          showFullscreenButton: true,
-        ),
+        params: const YoutubePlayerParams(showFullscreenButton: true),
       );
       setState(() {
         _isPlayingInline = true;
@@ -234,9 +232,7 @@ class _LessonVideoSectionState extends State<LessonVideoSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            YoutubePlayer(
-              controller: _controller!,
-            ),
+            YoutubePlayer(controller: _controller!),
             const SizedBox(height: 6),
             TextButton.icon(
               onPressed: _openExternalYouTube,
@@ -271,7 +267,11 @@ class _LessonVideoSectionState extends State<LessonVideoSection> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 30),
+              icon: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
               onPressed: _startInlinePlayer,
             ),
           ),

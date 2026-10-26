@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../home/screens/home_screen.dart';
 import '../services/auth_provider.dart';
 
@@ -63,13 +64,14 @@ class _LocalSetupScreenState extends State<LocalSetupScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Local Profile Setup'),
-      ),
+      appBar: AppBar(title: const Text('Local Profile Setup')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 20.0,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Form(
@@ -89,7 +91,9 @@ class _LocalSetupScreenState extends State<LocalSetupScreen> {
                     Text(
                       'Create a warm, private space tailored to you. Everything stays directly on your device.',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.72,
+                        ),
                         height: 1.45,
                       ),
                     ),
@@ -146,7 +150,9 @@ class _LocalSetupScreenState extends State<LocalSetupScreen> {
                           child: Text(
                             'Optional',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                           ),
                         ),
@@ -156,7 +162,9 @@ class _LocalSetupScreenState extends State<LocalSetupScreen> {
                     Text(
                       'Add an optional PIN to protect your personal reflections on this device.',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.65,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -216,8 +224,9 @@ class _LocalSetupScreenState extends State<LocalSetupScreen> {
                               obscureText: _obscureConfirmPin,
                               decoration: InputDecoration(
                                 hintText: 'Re-enter your PIN',
-                                prefixIcon:
-                                    const Icon(Icons.lock_reset_rounded),
+                                prefixIcon: const Icon(
+                                  Icons.lock_reset_rounded,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscureConfirmPin
@@ -254,12 +263,12 @@ class _LocalSetupScreenState extends State<LocalSetupScreen> {
                           key: const Key('submit_local_setup_btn'),
                           onPressed: auth.isLoading ? null : _submit,
                           child: auth.isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   height: 22,
                                   width: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: Colors.white,
+                                    color: theme.colorScheme.onPrimary,
                                   ),
                                 )
                               : const Text('Begin My Journey'),

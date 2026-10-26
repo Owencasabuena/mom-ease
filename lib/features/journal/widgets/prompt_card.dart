@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/journal_prompt.dart';
 
 /// Card presenting a daily reflection prompt with visual hierarchy and progressive disclosure.
@@ -64,7 +65,10 @@ class PromptCard extends StatelessWidget {
                 onTap: onViewEntry,
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
