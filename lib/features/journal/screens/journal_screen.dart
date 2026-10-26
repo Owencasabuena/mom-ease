@@ -314,8 +314,9 @@ class _JournalScreenState extends State<JournalScreen> {
 
     // Daily prompt logic with progressive disclosure
     final allPrompts = JournalPromptService().getAllPrompts();
-    final activePrompt = provider.featuredPrompt ??
-        allPrompts[_promptIndex % allPrompts.length];
+    final activePrompt = _promptIndex == 0
+        ? (provider.featuredPrompt ?? allPrompts.first)
+        : allPrompts[_promptIndex % allPrompts.length];
     final isPromptAnswered = provider.hasAnsweredPrompt(activePrompt.id);
     final answeredEntry = isPromptAnswered
         ? provider.getEntryForPrompt(activePrompt.id)

@@ -6,7 +6,7 @@ class PromptCard extends StatelessWidget {
   final JournalPrompt prompt;
   final String language;
   final VoidCallback onUsePrompt;
-  final VoidCallback onNextPrompt;
+  final VoidCallback? onNextPrompt;
   final bool isCompleted;
   final VoidCallback? onViewEntry;
 
@@ -15,7 +15,7 @@ class PromptCard extends StatelessWidget {
     required this.prompt,
     required this.language,
     required this.onUsePrompt,
-    required this.onNextPrompt,
+    this.onNextPrompt,
     this.isCompleted = false,
     this.onViewEntry,
   });
@@ -28,11 +28,11 @@ class PromptCard extends StatelessWidget {
     // Progressive disclosure: Compact card when prompt has already been answered today
     if (isCompleted) {
       return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.25),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: theme.colorScheme.secondary.withValues(alpha: 0.2),
           ),
@@ -41,130 +41,143 @@ class PromptCard extends StatelessWidget {
           children: [
             Icon(
               Icons.check_circle_outline_rounded,
-              size: 18,
+              size: 16,
               color: theme.colorScheme.secondary,
             ),
             const SizedBox(width: 8),
-            Text(
-              isTl ? 'Pagninilay: Nasagutan na ngayong araw' : 'Daily Reflection • Completed today',
-              style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.secondary,
+            Expanded(
+              child: Text(
+                isTl
+                    ? 'Pagninilay: Nasagutan na ngayong araw'
+                    : 'Daily Reflection • Completed today',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.secondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Spacer(),
-            if (onViewEntry != null)
-              TextButton(
-                onPressed: onViewEntry,
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      isTl ? 'Tingnan' : 'View',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.arrow_forward_rounded, size: 14),
-                  ],
+            if (onViewEntry != null) ...[
+              const SizedBox(width: 6),
+              InkWell(
+                onTap: onViewEntry,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        isTl ? 'Tingnan' : 'View',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 14,
+                        color: theme.colorScheme.secondary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            ],
           ],
         ),
       );
     }
 
-    // Default prominent reflection prompt card
+    // Default compact reflection prompt card
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(20),
+        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.secondary.withValues(alpha: 0.25),
+          color: theme.colorScheme.secondary.withValues(alpha: 0.2),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Supporting Header Row
-          Row(
-            children: [
-              Icon(
-                Icons.lightbulb_outline_rounded,
-                size: 16,
-                color: theme.colorScheme.secondary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                isTl ? 'Arawang Pagninilay' : 'Daily Reflection',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.3,
-                  color: theme.colorScheme.secondary,
-                ),
-              ),
-              const Spacer(),
-              Semantics(
-                label: isTl ? 'Ibang tanong' : 'Try another prompt',
-                button: true,
-                child: IconButton(
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  tooltip: isTl ? 'Ibang tanong' : 'Try another prompt',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: onNextPrompt,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Primary Question (The strongest visual text on the card)
-          Text(
-            prompt.localizedText(language),
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              height: 1.3,
-              letterSpacing: -0.2,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Action row
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: onUsePrompt,
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    isTl ? 'Sagutin' : 'Answer',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onUsePrompt,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.lightbulb_outline_rounded,
+                      size: 14,
+                      color: theme.colorScheme.secondary,
                     ),
+                    const SizedBox(width: 6),
+                    Text(
+                      isTl ? 'Arawang Pagninilay' : 'Daily Reflection',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.3,
+                        color: theme.colorScheme.secondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (onNextPrompt != null) ...[
+                      Semantics(
+                        label: isTl ? 'Ibang tanong' : 'Try another prompt',
+                        button: true,
+                        child: IconButton(
+                          icon: const Icon(Icons.refresh_rounded, size: 16),
+                          tooltip: isTl ? 'Ibang tanong' : 'Try another prompt',
+                          padding: const EdgeInsets.all(2),
+                          constraints: const BoxConstraints(),
+                          onPressed: onNextPrompt,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isTl ? 'Sagutin' : 'Answer',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 13,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  prompt.localizedText(language),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                    color: theme.colorScheme.onSurface,
                   ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 15,
-                    color: theme.colorScheme.primary,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

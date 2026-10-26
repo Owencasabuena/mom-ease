@@ -610,9 +610,14 @@ void main() {
       expect(provider.allEntries.first.userId, 'local_1740000000');
     });
 
-    testWidgets('PromptCard progressive disclosure renders compact completed state', (tester) async {
+    testWidgets('PromptCard progressive disclosure renders compact completed state without overflow', (tester) async {
       bool viewTapped = false;
       final prompt = kDefaultJournalPrompts.first;
+
+      // Simulate a narrow mobile device (320px)
+      tester.view.physicalSize = const Size(320 * 2.0, 600 * 2.0);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         MaterialApp(
@@ -631,6 +636,7 @@ void main() {
 
       expect(find.text('Daily Reflection • Completed today'), findsOneWidget);
       expect(find.text('View'), findsOneWidget);
+      expect(tester.takeException(), isNull);
 
       await tester.tap(find.text('View'));
       expect(viewTapped, isTrue);
