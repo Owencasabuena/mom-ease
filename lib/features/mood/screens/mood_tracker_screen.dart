@@ -97,15 +97,18 @@ class _DateHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
       child: Row(
         children: [
-          Text(
-            DateFormat('EEEE, MMMM d').format(mood.selectedDate),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+          Expanded(
+            child: Text(
+              DateFormat('EEEE, MMMM d').format(mood.selectedDate),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (!isToday) ...[
-            const Spacer(),
+            const SizedBox(width: 8),
             TextButton.icon(
               onPressed: () => mood.selectDate(today),
               icon: const Icon(Icons.today_rounded, size: 16),
@@ -271,47 +274,53 @@ class _SelectedDayCard extends StatelessWidget {
               Divider(height: 1, color: entryMood.color.withValues(alpha: 0.2)),
               const SizedBox(height: 8),
               // Actions row: Update Mood (secondary button) + Add Journal Entry (tertiary link)
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () => showLogMoodSheet(context,
-                        preselected: entryMood),
-                    icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: const Text('Update Mood'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 38),
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => showLogMoodSheet(context,
+                          preselected: entryMood),
+                      icon: const Icon(Icons.edit_outlined, size: 16),
+                      label: const Text('Update Mood'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 36),
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                  ),
-                  const Spacer(),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => JournalEditorScreen(
-                            initialDate: mood.selectedDate,
-                            initialMood: entryMood,
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => JournalEditorScreen(
+                              initialDate: mood.selectedDate,
+                              initialMood: entryMood,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    icon: Icon(
-                      Icons.edit_note_rounded,
-                      size: 18,
-                      color: theme.colorScheme.onSurfaceVariant,
+                        );
+                      },
+                      icon: Icon(
+                        Icons.edit_note_rounded,
+                        size: 18,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      label: const Text('Add Journal Entry'),
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        foregroundColor: theme.colorScheme.onSurfaceVariant,
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                      ),
                     ),
-                    label: const Text('Add Journal Entry'),
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      foregroundColor: theme.colorScheme.onSurfaceVariant,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

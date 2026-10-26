@@ -121,7 +121,11 @@ class _CalendarViewState extends State<CalendarView> {
               crossFadeState: _expanded
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
-              firstChild: _HorizontalDayStrip(mood: mood, theme: theme),
+              firstChild: _HorizontalDayStrip(
+                selectedDate: mood.selectedDate,
+                mood: mood,
+                theme: theme,
+              ),
               secondChild: Column(
                 children: [
                   Padding(
@@ -173,8 +177,13 @@ class _CalendarViewState extends State<CalendarView> {
 // ── Horizontal Day Strip (Compact View) ──────────────────────────────────────
 
 class _HorizontalDayStrip extends StatefulWidget {
-  const _HorizontalDayStrip({required this.mood, required this.theme});
+  const _HorizontalDayStrip({
+    required this.selectedDate,
+    required this.mood,
+    required this.theme,
+  });
 
+  final DateTime selectedDate;
   final MoodProvider mood;
   final ThemeData theme;
 
@@ -184,20 +193,23 @@ class _HorizontalDayStrip extends StatefulWidget {
 
 class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
   late ScrollController _scroll;
-  static const int _range = 30; // days before today
+  DateTime? _lastSelectedDate;
 
   @override
   void initState() {
     super.initState();
     _scroll = ScrollController();
+    _lastSelectedDate = widget.selectedDate;
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
   }
 
   @override
   void didUpdateWidget(covariant _HorizontalDayStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.mood.selectedDate != widget.mood.selectedDate) {
-      _scrollToSelected();
+    if (oldWidget.selectedDate != widget.selectedDate ||
+        _lastSelectedDate != widget.selectedDate) {
+      _lastSelectedDate = widget.selectedDate;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
     }
   }
 
@@ -209,31 +221,47 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
 
   void _scrollToSelected() {
     if (!_scroll.hasClients) return;
-    final today = DateTime.now();
-    final todayNorm = DateTime(today.year, today.month, today.day);
-    final selected = DateTime(widget.mood.selectedDate.year,
-        widget.mood.selectedDate.month, widget.mood.selectedDate.day);
-    final daysDiff = selected.difference(todayNorm).inDays;
-    final index = _range + daysDiff;
-    const itemWidth = 68.0;
-    final offset = (index * itemWidth) -
-        (MediaQuery.of(context).size.width / 2) +
-        itemWidth / 2;
+    final days = _buildDays();
+    final selected = widget.mood.selectedDate;
+    final index = days.indexWhere((d) =>
+        d.year == selected.year &&
+        d.month == selected.month &&
+        d.day == selected.day);
+    if (index < 0) return;
+
+    const totalItemWidth = 66.0;
+    const listPadding = 8.0;
+    final viewportWidth = _scroll.position.viewportDimension;
+    final targetOffset = (index * totalItemWidth) +
+        listPadding -
+        (viewportWidth / 2) +
+        (totalItemWidth / 2);
+
     _scroll.animateTo(
-      offset.clamp(0, _scroll.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
+      targetOffset.clamp(0.0, _scroll.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
     );
   }
 
   List<DateTime> _buildDays() {
     final today = DateTime.now();
-    final start = DateTime(today.year, today.month, today.day)
-        .subtract(const Duration(days: _range));
-    return List.generate(
-      _range + 15,
-      (i) => start.add(Duration(days: i)),
-    );
+    final todayNorm = DateTime(today.year, today.month, today.day);
+    final selectedNorm = DateTime(widget.mood.selectedDate.year,
+        widget.mood.selectedDate.month, widget.mood.selectedDate.day);
+
+    final earliest = selectedNorm
+            .isBefore(todayNorm.subtract(const Duration(days: 60)))
+        ? selectedNorm.subtract(const Duration(days: 7))
+        : todayNorm.subtract(const Duration(days: 60));
+
+    final latest =
+        selectedNorm.isAfter(todayNorm.add(const Duration(days: 14)))
+            ? selectedNorm.add(const Duration(days: 7))
+            : todayNorm.add(const Duration(days: 14));
+
+    final totalDays = latest.difference(earliest).inDays + 1;
+    return List.generate(totalDays, (i) => earliest.add(Duration(days: i)));
   }
 
   @override
@@ -243,11 +271,12 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
     final days = _buildDays();
 
     return SizedBox(
-      height: 84,
+      height: 96,
       child: ListView.builder(
         controller: _scroll,
+        physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         itemCount: days.length,
         itemBuilder: (ctx, i) {
           final day = days[i];
@@ -258,77 +287,136 @@ class _HorizontalDayStripState extends State<_HorizontalDayStrip> {
           final isFuture = day.isAfter(todayNorm);
           final entry = widget.mood.entryForDay(day);
 
-          return GestureDetector(
-            onTap: () => widget.mood.selectDate(day),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 60,
-              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? widget.theme.colorScheme.primary
-                    : isToday
-                        ? widget.theme.colorScheme.primaryContainer
-                        : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-                border: isToday && !isSelected
-                    ? Border.all(
-                        color: widget.theme.colorScheme.primary,
-                        width: 1.5,
-                      )
-                    : null,
+          Color bgColor;
+          Border? border;
+          List<BoxShadow>? shadows;
+          Color weekdayColor;
+          Color dayColor;
+
+          if (isSelected) {
+            bgColor = widget.theme.colorScheme.primary;
+            weekdayColor =
+                widget.theme.colorScheme.onPrimary.withValues(alpha: 0.9);
+            dayColor = widget.theme.colorScheme.onPrimary;
+            shadows = [
+              BoxShadow(
+                color:
+                    widget.theme.colorScheme.primary.withValues(alpha: 0.35),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    DateFormat('EEE').format(day).toUpperCase(),
-                    style: widget.theme.textTheme.labelSmall?.copyWith(
-                      color: isSelected
-                          ? widget.theme.colorScheme.onPrimary
-                          : isFuture
-                              ? widget.theme.colorScheme.onSurface
-                                  .withValues(alpha: 0.3)
-                              : widget.theme.colorScheme.onSurface
-                                  .withValues(alpha: 0.6),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 10,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${day.day}',
-                    style: widget.theme.textTheme.titleSmall?.copyWith(
-                      color: isSelected
-                          ? widget.theme.colorScheme.onPrimary
-                          : isFuture
-                              ? widget.theme.colorScheme.onSurface
-                                  .withValues(alpha: 0.3)
-                              : null,
-                      fontWeight:
-                          isSelected || isToday ? FontWeight.bold : null,
-                    ),
-                  ),
-                  if (entry != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Image.asset(
-                        entry.mood.assetPath,
-                        width: 18,
-                        height: 18,
-                        errorBuilder: (_, e, s) => Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected
-                                ? widget.theme.colorScheme.onPrimary
-                                : entry.mood.color,
+            ];
+          } else if (isToday) {
+            bgColor = widget.theme.colorScheme.primaryContainer
+                .withValues(alpha: 0.5);
+            border = Border.all(
+              color: widget.theme.colorScheme.primary,
+              width: 1.5,
+            );
+            weekdayColor = widget.theme.colorScheme.primary;
+            dayColor = widget.theme.colorScheme.primary;
+          } else if (isFuture) {
+            bgColor = widget.theme.colorScheme.surfaceContainerLowest;
+            border = Border.all(
+              color: widget.theme.colorScheme.outlineVariant
+                  .withValues(alpha: 0.2),
+              width: 1,
+            );
+            weekdayColor = widget.theme.colorScheme.onSurfaceVariant
+                .withValues(alpha: 0.65);
+            dayColor = widget.theme.colorScheme.onSurface
+                .withValues(alpha: 0.65);
+          } else {
+            bgColor = widget.theme.colorScheme.surfaceContainerLow;
+            border = Border.all(
+              color: widget.theme.colorScheme.outlineVariant
+                  .withValues(alpha: 0.35),
+              width: 1,
+            );
+            weekdayColor = widget.theme.colorScheme.onSurfaceVariant;
+            dayColor = widget.theme.colorScheme.onSurface;
+          }
+
+          return Semantics(
+            button: true,
+            selected: isSelected,
+            label:
+                '${DateFormat('EEEE, MMMM d').format(day)}${entry != null ? ', Mood: ${entry.mood.label}' : ''}',
+            child: Container(
+              width: 58,
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(18),
+                border: border,
+                boxShadow: shadows,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => widget.mood.selectDate(day),
+                  borderRadius: BorderRadius.circular(18),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          DateFormat('EEE').format(day).toUpperCase(),
+                          style: widget.theme.textTheme.labelSmall?.copyWith(
+                            color: weekdayColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            letterSpacing: 0.4,
                           ),
                         ),
-                      ),
+                        Text(
+                          '${day.day}',
+                          style: widget.theme.textTheme.titleMedium?.copyWith(
+                            color: dayColor,
+                            fontWeight: isSelected || isToday
+                                ? FontWeight.bold
+                                : FontWeight.w600,
+                            fontSize: 17,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                          child: Center(
+                            child: entry != null
+                                ? Image.asset(
+                                    entry.mood.assetPath,
+                                    width: 20,
+                                    height: 20,
+                                    errorBuilder: (_, _, _) => Text(
+                                      entry.mood.emoji,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        height: 1,
+                                      ),
+                                    ),
+                                  )
+                                : isToday
+                                    ? Container(
+                                        width: 4,
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: isSelected
+                                              ? widget.theme.colorScheme
+                                                  .onPrimary
+                                                  .withValues(alpha: 0.7)
+                                              : widget.theme.colorScheme
+                                                  .primary,
+                                        ),
+                                      )
+                                    : const SizedBox(height: 20),
+                          ),
+                        ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
             ),
           );

@@ -347,6 +347,47 @@ void main() {
       expect(find.text('Update Mood'), findsOneWidget);
       expect(find.text('Add Journal Entry'), findsOneWidget);
     });
+
+    testWidgets('Horizontal day strip selects dates and updates mood card',
+        (WidgetTester tester) async {
+      final now = DateTime.now();
+      final yesterday = now.subtract(const Duration(days: 1));
+
+      // Save happy for today, sad for yesterday
+      await moodProvider.selectDate(now);
+      await moodProvider.saveMoodForSelectedDate(MoodType.happy);
+      await moodProvider.selectDate(yesterday);
+      await moodProvider.saveMoodForSelectedDate(MoodType.sad);
+      await moodProvider.selectDate(now);
+
+      await tester.pumpWidget(createTestWidget(const MoodTrackerScreen()));
+      await tester.pumpAndSettle();
+
+      // Today shows happy
+      expect(find.text('Happy'), findsWidgets);
+
+      // Tap yesterday in the day strip (inside ListView)
+      final dayFinder = find.descendant(
+        of: find.byType(ListView),
+        matching: find.text('${yesterday.day}'),
+      ).first;
+      await tester.tap(dayFinder);
+      await tester.pumpAndSettle();
+
+      // Updates selected date to yesterday and displays sad mood
+      expect(moodProvider.selectedDate.day, yesterday.day);
+      expect(find.text('Sad'), findsWidgets);
+
+      // Now tap the 'Today' button in the header
+      expect(find.text('Today'), findsOneWidget);
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      // Selected date returns to today
+      expect(moodProvider.selectedDate.day, now.day);
+      expect(find.text('Happy'), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
   });
 }
 
