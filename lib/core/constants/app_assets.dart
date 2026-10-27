@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Centralized references to MomEase finalized branding assets.
 abstract final class AppAssets {
-  static const String appIcon = 'assets/branding/app_icon.png';
+  static const String appIcon = 'assets/branding/app_icon.jpg';
   static const String stackedLogoLight =
       'assets/branding/stacked_logo_light.png';
   static const String stackedLogoDark = 'assets/branding/stacked_logo_dark.png';
